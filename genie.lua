@@ -47,6 +47,7 @@ project "NetworkGame"
 	  "./src/",
 	  "./tests/",
 	  "./deps/SDL2-2.0.14/include",
+	  "./deps/SDL2_image-2.0.5/include",
 	}
 
 	--Common files
@@ -54,7 +55,8 @@ project "NetworkGame"
 		"./include/**.h",
 		"./src/**.cpp",
 		"./tests/client_main.cpp",
-	    "./deps/SDL2-2.0.14/include/**.h",
+	    	"./deps/SDL2-2.0.14/include/**.h",
+	    	"./deps/SDL2_image-2.0.5/include/**.h",
 	}
 
 	defines { 	
@@ -67,6 +69,7 @@ project "NetworkGame"
 		"ws2_32",
 		"./deps/SDL2-2.0.14/lib/x64/SDL2",
 		"./deps/SDL2-2.0.14/lib/x64/SDL2main",
+		"./deps/SDL2_image-2.0.5/lib/x64/SDL2_image",
 	}
 
 
@@ -81,7 +84,6 @@ project "NetworkServer"
 	  "./include/",
 	  "./src/",
 	  "./tests/",
-	  "./deps/SDL2-2.0.14/include",
 	}
 
 	--Common files
@@ -89,7 +91,6 @@ project "NetworkServer"
 		"./include/**.h",
 		"./src/**.cpp",
 		"./tests/server_main.cpp",
-	    --"./deps/SDL2-2.0.14/include/**.h",
 	}
 
 	defines { 	
@@ -100,7 +101,5 @@ project "NetworkServer"
 	
 	links{
 		"ws2_32",
-		--"./deps/SDL2-2.0.14/lib/x64/SDL2",
-		--"./deps/SDL2-2.0.14/lib/x64/SDL2main",
 	}
 
