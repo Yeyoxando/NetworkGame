@@ -64,9 +64,9 @@ project "NetworkGame"
 	}	 
 	
 	links{
+		"ws2_32",
 		"./deps/SDL2-2.0.14/lib/x64/SDL2",
 		"./deps/SDL2-2.0.14/lib/x64/SDL2main",
-		"./deps/SDL2-2.0.14/lib/x64/SDL2test",
 	}
 
 
@@ -99,8 +99,8 @@ project "NetworkServer"
 	}	 
 	
 	links{
+		"ws2_32",
 		--"./deps/SDL2-2.0.14/lib/x64/SDL2",
 		--"./deps/SDL2-2.0.14/lib/x64/SDL2main",
-		--"./deps/SDL2-2.0.14/lib/x64/SDL2test",
 	}
 
