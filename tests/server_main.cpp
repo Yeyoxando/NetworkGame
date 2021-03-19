@@ -43,10 +43,8 @@ static DWORD client_thread(void* user_data) {
 
 	//Added client
 	printf("\nConnected client #%d.", connected_clients);
-
-  while (connected_clients < 2) {}
-
-	while (true) {
+	
+  while (true) {
 
     lockMutex();
     if (player_disconnected) break;
