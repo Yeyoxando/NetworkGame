@@ -10,6 +10,90 @@
 #include <stdio.h>
 
 #include "game_data.h"
+#include "network_manager.h"
+
+// ------------------------------------------------------------------------- //
+
+static int connected_clients = 0;
+bool player_disconnected = false;
+
+// ------------------------------------------------------------------------- //
+
+static DWORD client_thread(void* user_data) {
+  
+  SOCKET sock = (SOCKET)user_data;
+  int result = 0;
+  int count = 0;
+
+	DataPackage data;
+	Transform transforms[2];
+
+
+  lockMutex();
+  count = ++connected_clients;
+  unlockMutex();
+
+  printf("\n Client thread started.");
+
+	//Prepare client package to set player id
+	data.package_kind = kDataPackageKind_Client;
+	data.client.id = count;
+	//Send package
+	send(sock, (char*)&data, sizeof(DataPackage), 0);
+
+	//Added client
+	printf("\nConnected client #%d.", connected_clients);
+
+  while (connected_clients < 2) {}
+
+	while (true) {
+
+    lockMutex();
+    if (player_disconnected) break;
+    unlockMutex();
+
+		//Receive transform from player
+		result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
+		if (result > 0) {
+			printf("\n Data received player %d: Transform. X: %d. Y: %d", count, data.transform.x, data.transform.y);
+      lockMutex();
+      transforms[count - 1] = data.transform;
+      unlockMutex();
+		}
+		else if (result == 0) {
+      lockMutex();
+      count = --connected_clients;
+      player_disconnected = true;
+      unlockMutex();
+
+			printf("\n A player has disconnected from the game.");
+			break;
+		}
+		else {
+			printf("\n Player %d data receive failed.", count);
+		}
+
+
+		//Send transform to other players
+		data.package_kind = kDataPackageKind_Transform;
+		//Player 2 position to player 1 client
+    int other_player = count == 1 ? 1 : 0;
+
+    lockMutex();
+		data.transform = transforms[other_player];
+    unlockMutex();
+
+    send(sock, (char*)&data, sizeof(DataPackage), 0);
+
+	}
+
+  send(sock, 0, 0, 0);
+
+  closesocket(sock);
+
+  return 0;
+
+}
 
 // ------------------------------------------------------------------------- //
 
@@ -25,7 +109,6 @@ int main() {
   int result = 0;
 
   //Server variables
-  int connected_clients = 0;
   DataPackage data;
   Transform transforms[2];
 
@@ -37,6 +120,7 @@ int main() {
     printf("\nERROR: Winsock can't initialize.");
     return EXIT_FAILURE;
   }
+
 
   //Set socket attributes
   sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -69,6 +153,8 @@ int main() {
 		return EXIT_FAILURE;
   }
 
+  InitializeSRWLock(&mutex);
+
   //Wait for clients connection
   while (connected_clients < 2) {
     //Accept client
@@ -79,67 +165,20 @@ int main() {
 			return EXIT_FAILURE;
     }
 
-    //Prepare client package to set player id
-    data.package_kind = kDataPackageKind_Client;
-    data.client.id = connected_clients + 1;
-    
-    //Send package
-    send(client_sock[connected_clients], (char*)&data, sizeof(DataPackage), 0);
-    
-    //Added client
-    connected_clients++;
-    printf("\nConnected client #%d.", connected_clients);
-  }
-
-  //Game loop variables management
-  while (1) {
-    //Receive input player 1
-    result = recv(client_sock[0], (char*)&data, sizeof(DataPackage), 0);
-    if (result > 0) {
-      printf("\n Data received p1: Transform. X: %d. Y: %d", data.transform.x, data.transform.y);
-      transforms[0] = data.transform;
-    }
-    else if (result == 0) {
-      printf("\n Player 1 lost connection.");
-      send(client_sock[1], 0, 0, 0);
-      connected_clients--;
-      break;
-    }
-    else {
-      printf("\n Player 1 data receive failed.");
-    }
-    //Receive input player 2
-    result = recv(client_sock[1], (char*)&data, sizeof(DataPackage), 0);
-    if (result > 0) {
-      printf("\n Data received p2: Transform. X: %d. Y: %d", data.transform.x, data.transform.y);
-      transforms[1] = data.transform;
-		}
-		else if (result == 0) {
-			printf("\n Player 2 lost connection.");
-			send(client_sock[0], 0, 0, 0);
-			connected_clients--;
-      break;
-		}
-		else {
-			printf("\n Player 2 data receive failed.");
-		}
-
-
-    //Send transforms to both players
-    data.package_kind = kDataPackageKind_Transform;
-    //Player 2 position to player 1 client
-    data.transform = transforms[1];
-    send(client_sock[0], (char*)&data, sizeof(DataPackage), 0);
-    //Player 1 position to player 2 client
-    data.transform = transforms[0];
-    send(client_sock[1], (char*)&data, sizeof(DataPackage), 0);
+    // Create a thread for the new client
+    CreateThread(nullptr, 0, client_thread, (void*)client_sock[connected_clients], 0, nullptr);
 
   }
+
+  // Wait while 2 clients are connected
+  while (connected_clients == 2) {
+    
+  }
+
+  // The console should wait a bit when closed until the rest of things get done
 
   //Close sockets
   closesocket(sock);
-  closesocket(client_sock[0]);
-  closesocket(client_sock[1]);
 
   //Shut down Winsock
   WSACleanup();

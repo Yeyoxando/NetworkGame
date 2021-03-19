@@ -11,6 +11,97 @@
 
 #include <SDL.h>
 #include "game_data.h"
+#include "network_manager.h"
+
+// ------------------------------------------------------------------------- //
+
+Transform p1;
+Transform p2;
+bool connection_running = false;
+
+// ------------------------------------------------------------------------- //
+
+static DWORD socket_thread(void* user_data) {
+
+  connection_running = true;
+
+	int result = 0;
+  SOCKET sock;
+	struct sockaddr_in server_ip;
+	int ip_length = sizeof(server_ip);
+	DataPackage data;
+	Client client = { -1 };
+
+	//Set socket attributes
+	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (sock == INVALID_SOCKET) {
+		WSACleanup();
+		return EXIT_FAILURE;
+	}
+	server_ip = SetIP("127.0.0.1", 50000);
+
+  printf("\n Socket thread started.");
+
+	//Connect client to server ip
+	result = connect(sock, (SOCKADDR*)&server_ip, ip_length);
+	if (result == SOCKET_ERROR) {
+		printf("\nERROR: client socket cannot bind.");
+		closesocket(sock);
+		WSACleanup();
+		return EXIT_FAILURE;
+	}
+	else {
+		printf("\nConnected.");
+	}
+
+
+  // Receive client id
+	recv(sock, (char*)&data, sizeof(DataPackage), 0);
+	if (data.package_kind == kDataPackageKind_Client) {
+		client.id = data.client.id;
+		printf("\nClient %d", client.id);
+	}
+	else {
+		printf("\nERROR: Client data not received.");
+		return 1;
+	}
+
+
+
+  while (true) {
+
+    lockMutex();
+    if (!connection_running) break;
+    unlockMutex();
+
+		//Send user current transform to server
+		data.transform = client.id == 1 ? p1 : p2;
+		send(sock, (char*)&data, sizeof(DataPackage), 0);
+
+    // Receive data from the other user
+		result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
+		if (result > 0) {
+			if (client.id == 1) {
+				p2 = data.transform;
+			}
+			else {
+				p1 = data.transform;
+			}
+		}
+		else{
+			printf("\n Lost connection. Game finished.");
+			lockMutex();
+			connection_running = false;
+			unlockMutex();
+			break;
+		}
+  }
+
+  send(sock, 0, 0, 0);
+
+  closesocket(sock);
+
+}
 
 // ------------------------------------------------------------------------- //
 
@@ -21,17 +112,7 @@ int main(int argc, char* argv[]) {
   SDL_Event events;
 
   //Winsock variables
-  int result = 0;
   WSADATA wsa;
-  SOCKET sock;
-  struct sockaddr_in server_ip;
-  int ip_length = sizeof(server_ip);
-  DataPackage data;
-  Client client = { -1};
-  
-  // Game variables
-  Transform p1;
-  Transform p2;
 
   // Init window
   SDL_Init(SDL_INIT_EVERYTHING);
@@ -42,11 +123,7 @@ int main(int argc, char* argv[]) {
 
   // TODO: Load sprites
 
-  // Game things start
-  p1.x = 0;
-  p1.y = 0;
-  p2.x = 100;
-  p2.y = 100;
+  // TODO: Game things start
 
   // Winsock start
   if (WSAStartup(MAKEWORD(2, 0), &wsa) == 0) {
@@ -57,38 +134,13 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
   }
 
-  //Set socket attributes
-	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (sock == INVALID_SOCKET) {
-		WSACleanup();
-		return EXIT_FAILURE;
-	}
-  server_ip = SetIP("127.0.0.1", 50000);
+  InitializeSRWLock(&mutex);
 
-  //Connect client to server ip
-  result = connect(sock, (SOCKADDR*)&server_ip, ip_length);
-  if (result == SOCKET_ERROR) {
-		printf("\nERROR: client socket cannot bind.");
-		closesocket(sock);
-		WSACleanup();
-		return EXIT_FAILURE;
-  }
-  else{
-    printf("\nConnected.");
-  }
+  // Network thread
+  CreateThread(nullptr, 0, socket_thread, nullptr, 0, nullptr);
 
-  //Receive client data
-  recv(sock, (char*)&data, sizeof(DataPackage), 0);
-  if (data.package_kind == kDataPackageKind_Client) {
-    client.id = data.client.id;
-    printf("\nClient %d", client.id);
-  }
-  else {
-    printf("\nERROR: Client data not received.");
-    return 1;
-  }
-
-  while (!window_should_close){
+  // Game loop
+  while (!window_should_close){ // Not works by closing it from the console
 
     // last time
 
@@ -108,8 +160,8 @@ int main(int argc, char* argv[]) {
     
 
 		//Send user current transform to server
-    data.transform = client.id == 1 ? p1 : p2;
-		send(sock, (char*)&data, sizeof(DataPackage), 0);
+    /*data.transform = client.id == 1 ? p1 : p2;
+		send(sock, (char*)&data, sizeof(DataPackage), 0);*/
 
 		// Draw
 		SDL_RenderClear(renderer);
@@ -122,7 +174,7 @@ int main(int argc, char* argv[]) {
     // end frame
 
     //Receive enemy server data
-    result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
+    /*result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
     if (result > 0) {
       if (client.id == 1) {
         p2 = data.transform;
@@ -143,25 +195,32 @@ int main(int argc, char* argv[]) {
     }
     else {
       printf("\n Data receive failed.");
-    }
+    }*/
 
   }
 
   // Disconnect message
-	send(sock, 0, 0, 0);
+	//send(sock, 0, 0, 0);
 
   //Close sockets
-  closesocket(sock);
-  printf("\nSocket disconnected from server");
+  //closesocket(sock);
+  //printf("\nSocket disconnected from server");
+
+	lockMutex();
+  connection_running = false;
+  unlockMutex();
+  // Wait for network processes to finish
+  SDL_Delay(3000);
 
   //Shut down Winsock
   WSACleanup();
 
-  // TODO: Destroy window
+  // Destroy window
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
-  SDL_Quit();
 
+  SDL_Quit();
+  
   return EXIT_SUCCESS;
 
 }

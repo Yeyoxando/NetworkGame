@@ -44,6 +44,7 @@ project "NetworkGame"
 
 	includedirs{
 	  "./include/",
+	  "./include/game_engine/",
 	  "./src/",
 	  "./tests/",
 	  "./deps/SDL2-2.0.14/include",
