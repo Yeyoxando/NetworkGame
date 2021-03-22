@@ -24,9 +24,9 @@
 #ifndef SDL_IMAGE_H_
 #define SDL_IMAGE_H_
 
-#include "SDL.h"
-#include "SDL_version.h"
-#include "begin_code.h"
+#include "../deps/SDL2-2.0.14/include/SDL.h"
+#include "../deps/SDL2-2.0.14/include/SDL_version.h"
+#include "../deps/SDL2-2.0.14/include/begin_code.h"
 
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus

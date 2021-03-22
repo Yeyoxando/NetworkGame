@@ -1,5 +1,8 @@
-rmdir /s /q build/Project3
-rm build/Project3.sln
+
+del ".\build\Debug\" /s /q 
+del ".\build\NetworkGame\" /s /q 
+del ".\build\NetworkServer\" /s /q 
+del ".\build\Project3.sln"
 
 .\tools\genie.exe vs2019
 

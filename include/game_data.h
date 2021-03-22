@@ -1,3 +1,20 @@
+/*
+ *	Author: Diego Ochando Torres
+ *  Date: 16/03/2021
+ *  e-mail: c0022981@my.shu.ac.uk | yeyoxando@gmail.com
+ */
+
+// ------------------------------------------------------------------------- //
+
+#include <WinSock2.h>
+
+// ------------------------------------------------------------------------- //
+
+#ifndef __GAME_DATA_H__
+#define __GAME_DATA_H__
+
+// ------------------------------------------------------------------------- //
+
 //Indicates the kind of the package
 enum DataPackageKind {
 	kDataPackageKind_Client = 0,
@@ -5,10 +22,14 @@ enum DataPackageKind {
 	kDataPackageKind_Null
 };
 
+// ------------------------------------------------------------------------- //
+
 //Client identifier
 struct Client {
 	int id;
 };
+
+// ------------------------------------------------------------------------- //
 
 // Indicates the id of the player, and its position and direction
 struct Transform {
@@ -18,6 +39,8 @@ struct Transform {
 	unsigned char direction;
 };
 
+// ------------------------------------------------------------------------- //
+
 // Package to send, can contain different information, identified later by the receiver
 struct DataPackage {
 	DataPackageKind package_kind;
@@ -26,15 +49,4 @@ struct DataPackage {
 
 // ------------------------------------------------------------------------- //
 
-//Returns a new ip settled with the given parameters
-sockaddr_in SetIP(const char* ip, int port) {
-	struct sockaddr_in new_ip;
-
-	new_ip.sin_family = AF_INET;
-	new_ip.sin_addr.s_addr = inet_addr(ip);
-	new_ip.sin_port = htons(port);
-
-	return new_ip;
-}
-
-// ------------------------------------------------------------------------- //
+#endif // __GAME_DATA_H__

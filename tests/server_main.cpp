@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 #include "game_data.h"
-#include "network_manager.h"
+#include "network_helpers.h"
 
 // ------------------------------------------------------------------------- //
 
@@ -53,7 +53,7 @@ static DWORD client_thread(void* user_data) {
 		//Receive transform from player
 		result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
 		if (result > 0) {
-			printf("\n Data received player %d: Transform. X: %d. Y: %d", count, data.transform.x, data.transform.y);
+			//printf("\n Data received player %d: Transform. X: %d. Y: %d", count, data.transform.x, data.transform.y);
       lockMutex();
       transforms[count - 1] = data.transform;
       unlockMutex();
@@ -74,7 +74,7 @@ static DWORD client_thread(void* user_data) {
 
 		//Send transform to other players
 		data.package_kind = kDataPackageKind_Transform;
-		//Player 2 position to player 1 client
+		//Player 2 position to player 1 client and vice versa
     int other_player = count == 1 ? 1 : 0;
 
     lockMutex();
@@ -100,8 +100,8 @@ int main() {
   WSADATA wsa;
   SOCKET sock;
   SOCKET client_sock[2];
-  struct sockaddr_in server_ip;
-  struct sockaddr_in clients_ip[2];
+  sockaddr_in server_ip;
+  sockaddr_in clients_ip[2];
   int ip_length = sizeof(server_ip);
   int client_ip_length = sizeof(clients_ip[0]);
   int result = 0;
@@ -110,70 +110,47 @@ int main() {
   DataPackage data;
   Transform transforms[2];
 
-  //Winsock start
-  if (WSAStartup(MAKEWORD(2, 0), &wsa) == 0) {
-    printf("\nWinsock ready.");
-  }
-  else {
-    printf("\nERROR: Winsock can't initialize.");
-    return EXIT_FAILURE;
-  }
-
+	//Winsock start
+  if (startWinsock(&wsa) != 0) return EXIT_FAILURE;
 
   //Set socket attributes
-  sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if (sock == INVALID_SOCKET) {
-    WSACleanup();
-    return EXIT_FAILURE;
-  }
+  if (initSocket(&sock) != 0) return EXIT_FAILURE;
+  
   //Server ip setting 
   server_ip = SetIP("0.0.0.0", 50000);
 
   //Socket binding to server ip
-  if (bind(sock, (SOCKADDR*)&server_ip, ip_length) == 0){
-    printf("\nSocket binded correctly.");
-  }
-  else {
-    printf("\nERROR: socket cannot bind.");
-    closesocket(sock);
-    WSACleanup();
-    return EXIT_FAILURE;
-  }
+  if (bindSocket(&sock, (SOCKADDR*)&server_ip, ip_length) != 0) return EXIT_FAILURE;
 
   //Enable socket listening to admit 2 connections
-  if (listen(sock, 2) == 0){
-    printf("\nSocket listening for 2 clients.");
-  }
-  else {
-		printf("\nERROR: Socket not listening.");
-		closesocket(sock);
-		WSACleanup();
-		return EXIT_FAILURE;
-  }
+  if (listenConnections(&sock, 2) != 0) return EXIT_FAILURE;
 
+  // Init mutex
   InitializeSRWLock(&mutex);
 
+  int internal_clients = 0;
   //Wait for clients connection
-  while (connected_clients < 2) {
+  while (internal_clients < 2) {
     //Accept client
-    client_sock[connected_clients] = accept(sock, (SOCKADDR*)&clients_ip[connected_clients], NULL);
-		if (client_sock[connected_clients] == INVALID_SOCKET) {
-			closesocket(sock);
-			WSACleanup();
-			return EXIT_FAILURE;
-    }
+    if (acceptClient(&sock, &client_sock[connected_clients], (SOCKADDR*)&clients_ip[connected_clients]) != 0) return EXIT_FAILURE;
+    ++internal_clients;
 
     // Create a thread for the new client
-    CreateThread(nullptr, 0, client_thread, (void*)client_sock[connected_clients], 0, nullptr);
-
+		CreateThread(nullptr, 0, client_thread, (void*)client_sock[connected_clients], 0, nullptr);
+		Sleep(1000);
   }
 
   // Wait while 2 clients are connected
-  while (connected_clients == 2) {
-    
+  while (internal_clients == 2) {
+    if (connected_clients < 2) break;
   }
 
   // The console should wait a bit when closed until the rest of things get done
+  if (client_sock[0] != INVALID_SOCKET)
+    send(client_sock[0], 0, 0, 0);
+
+	if (client_sock[1] != INVALID_SOCKET)
+		send(client_sock[1], 0, 0, 0);
 
   //Close sockets
   closesocket(sock);

@@ -54,7 +54,9 @@ project "NetworkGame"
 	--Common files
 	files{
 		"./include/**.h",
+	  	"./include/game_engine/**.h",
 		"./src/**.cpp",
+		"./src/game_engine/**.cpp",
 		"./tests/client_main.cpp",
 	    	"./deps/SDL2-2.0.14/include/**.h",
 	    	"./deps/SDL2_image-2.0.5/include/**.h",
@@ -83,14 +85,13 @@ project "NetworkServer"
 
 	includedirs{
 	  "./include/",
-	  "./src/",
 	  "./tests/",
 	}
 
 	--Common files
 	files{
-		"./include/**.h",
-		"./src/**.cpp",
+		"./include/game_data.h",
+		"./include/network_helpers.h",
 		"./tests/server_main.cpp",
 	}
 
