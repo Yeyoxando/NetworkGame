@@ -10,6 +10,7 @@
 // ------------------------------------------------------------------------- //
 
 #include "game_data.h"
+#include "scene.h"
 
 #include <../deps/SDL2-2.0.14/include/SDL.h>
 #include <../deps/SDL2_image-2.0.5/include/SDL_image.h>
@@ -21,10 +22,12 @@ public:
 	NetworkGame();
 	~NetworkGame();
 
+	static NetworkGame& instance();
+
 	void init();
 
 	void loadResources();
-	void startGame();
+	void loadGame();
 
 	void input();
 	void update();
@@ -32,16 +35,25 @@ public:
 
 	void close();
 
+	Scene* getScene();
+
 	bool window_should_close_;
 
-	Transform p1;
-	Transform p2;
+	TransformTest p1;
+	TransformTest p2;
 
 private:
+	Scene* scene_;
+
 	SDL_Window* window_;
 	SDL_Renderer* renderer_;
 
 	SDL_Event events_;
+
+
+	friend class GameObject;
+	friend class Sprite;
+	friend class Label;
 
 };
 

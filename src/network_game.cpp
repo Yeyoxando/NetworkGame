@@ -32,6 +32,15 @@ NetworkGame::~NetworkGame() {
 
 // ------------------------------------------------------------------------- //
 
+NetworkGame& NetworkGame::instance(){
+	
+	static NetworkGame* instance = new NetworkGame();
+	return *instance;
+
+}
+
+// ------------------------------------------------------------------------- //
+
 void NetworkGame::init() {
 
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -41,20 +50,25 @@ void NetworkGame::init() {
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);
 	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
 
+	scene_->init();
+
 }
 
 // ------------------------------------------------------------------------- //
 
 void NetworkGame::loadResources() {
 
-
+	// Sprites, maps and everything
 
 }
 
 // ------------------------------------------------------------------------- //
 
-void NetworkGame::startGame() {
+void NetworkGame::loadGame() {
 
+	// Create game objects and map.
+
+	GameObject* g1 = GameObject::CreateGameObject();
 
 
 }
@@ -80,7 +94,7 @@ void NetworkGame::input() {
 
 void NetworkGame::update() {
 
-
+	scene_->update();
 
 }
 
@@ -89,6 +103,7 @@ void NetworkGame::update() {
 void NetworkGame::draw() {
 
 	// Draw things
+	scene_->draw();
 
 	SDL_RenderClear(renderer_);
 	SDL_RenderPresent(renderer_);
@@ -99,10 +114,20 @@ void NetworkGame::draw() {
 
 void NetworkGame::close() {
 
+	scene_->finish();
+
 	SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);
 
 	SDL_Quit();
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Scene* NetworkGame::getScene(){
+
+	return scene_;
 
 }
 

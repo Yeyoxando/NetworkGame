@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 
   // Init resources and game
   game->loadResources();
-  game->startGame();
+  game->loadGame();
 
 
 	//Winsock start

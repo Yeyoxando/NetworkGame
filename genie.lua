@@ -47,6 +47,8 @@ project "NetworkGame"
 	  "./include/game_engine/",
 	  "./src/",
 	  "./tests/",
+	  "./deps/glm/glm/",
+	  "./deps/SDL2_ttf-2.0.15/include",
 	  "./deps/SDL2-2.0.14/include",
 	  "./deps/SDL2_image-2.0.5/include",
 	}
@@ -60,12 +62,18 @@ project "NetworkGame"
 		"./tests/client_main.cpp",
 	    	"./deps/SDL2-2.0.14/include/**.h",
 	    	"./deps/SDL2_image-2.0.5/include/**.h",
+	  	"./deps/SDL2_ttf-2.0.15/include/**.h",
+
+		--GLM
+		"./deps/glm/glm/**.h",
+		"./deps/glm/glm/*.hpp",
 	}
 
 	defines { 	
 		"WIN32",
 		"_WIN32",
 		"_WINDOWS",
+		"GLM_FORCE_RADIANS",
 	}	 
 	
 	links{
@@ -73,6 +81,7 @@ project "NetworkGame"
 		"./deps/SDL2-2.0.14/lib/x64/SDL2",
 		"./deps/SDL2-2.0.14/lib/x64/SDL2main",
 		"./deps/SDL2_image-2.0.5/lib/x64/SDL2_image",
+		"./deps/SDL2_ttf-2.0.15/lib/x64/SDL2_ttf",
 	}
 
 
@@ -85,6 +94,7 @@ project "NetworkServer"
 
 	includedirs{
 	  "./include/",
+	  "./deps/glm/glm/",
 	  "./tests/",
 	}
 
@@ -93,12 +103,17 @@ project "NetworkServer"
 		"./include/game_data.h",
 		"./include/network_helpers.h",
 		"./tests/server_main.cpp",
+
+		--GLM
+		"./deps/glm/glm/**.h",
+		"./deps/glm/glm/*.hpp",
 	}
 
 	defines { 	
 		"WIN32",
 		"_WIN32",
 		"_WINDOWS",
+		"GLM_FORCE_RADIANS",
 	}	 
 	
 	links{

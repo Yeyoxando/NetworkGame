@@ -26,7 +26,7 @@ static DWORD client_thread(void* user_data) {
   int count = 0;
 
 	DataPackage data;
-	Transform transforms[2];
+	TransformTest transforms[2];
 
 
   lockMutex();
@@ -108,7 +108,7 @@ int main() {
 
   //Server variables
   DataPackage data;
-  Transform transforms[2];
+  TransformTest transforms[2];
 
 	//Winsock start
   if (startWinsock(&wsa) != 0) return EXIT_FAILURE;

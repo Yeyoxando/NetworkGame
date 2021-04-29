@@ -32,7 +32,7 @@ struct Client {
 // ------------------------------------------------------------------------- //
 
 // Indicates the id of the player, and its position and direction
-struct Transform {
+struct TransformTest {
 	unsigned char id_player;
 	short x;
 	short y;
@@ -44,7 +44,7 @@ struct Transform {
 // Package to send, can contain different information, identified later by the receiver
 struct DataPackage {
 	DataPackageKind package_kind;
-	union { Client client; Transform transform; };
+	union { Client client; TransformTest transform; };
 };
 
 // ------------------------------------------------------------------------- //
