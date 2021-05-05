@@ -13,7 +13,7 @@ Link
 
 
 ## Game concept
-
+Kinda simplified AoE
 
 ## Game rules and how to play it
 
