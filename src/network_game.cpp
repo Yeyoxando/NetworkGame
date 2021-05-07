@@ -14,6 +14,7 @@ NetworkGame::NetworkGame(){
 
 	window_ = nullptr;
 	renderer_ = nullptr;
+	tex_loader_ = nullptr;
 
 	window_should_close_ = false;
 
@@ -25,8 +26,6 @@ NetworkGame::NetworkGame(){
 // ------------------------------------------------------------------------- //
 
 NetworkGame::~NetworkGame() {
-
-
 
 }
 
@@ -53,9 +52,12 @@ void NetworkGame::init() {
 	scene_ = new Scene();
 	scene_->init();
 
+	tex_loader_ = new TextureLoader();
+
 	NetworkGame::instance().window_ = window_;
 	NetworkGame::instance().renderer_ = renderer_;
 	NetworkGame::instance().scene_ = scene_;
+	NetworkGame::instance().tex_loader_ = tex_loader_;
 
 }
 
@@ -64,6 +66,9 @@ void NetworkGame::init() {
 void NetworkGame::loadResources() {
 
 	// Sprites, maps and everything
+	/*tex_loader_->loadTexture("../../../data/images/tileset.png");
+	tex_loader_->loadTexture("../../../data/images/terrain.png");
+	tex_loader_->loadTexture("../../../data/images/objects.png");*/
 
 }
 
@@ -75,9 +80,23 @@ void NetworkGame::loadGame() {
 	Scene* scene = scene_;
 
 	GameObject* g1 = GameObject::CreateGameObject();
-	Sprite* sprite = new Sprite(*g1, "tileset.png");
-	sprite->set_pivotPoint(kPivotPoint_Center);
+	Sprite* sprite = new Sprite(*g1, "../../../data/images/tileset.png");
+	g1->transform_.position_ = glm::vec3(276.0f, 210.0f, 0);
 	g1->addComponent(sprite);
+
+	/*GameObject* g2 = GameObject::CreateGameObject();
+	Sprite* sprite2 = new Sprite(*g2, "../../../data/images/terrain.png", 96, 0, 16, 16);
+	g2->transform_.position_ = glm::vec3(8.0f, 8.0f, 0);
+	g2->addComponent(sprite2);*/
+
+	/*for (int y = 0; y < 25; ++y) {
+		for (int x = 0; x < 38; ++x) {
+			GameObject* g2 = GameObject::CreateGameObject();
+			Sprite* sprite2 = new Sprite(*g2, "../../../data/images/terrain.png", 96, 0, 16, 16);
+			g2->transform_.position_ = glm::vec3(8.0f + x * 16.0f, 8.0f + y * 16.0f, 0);
+			g2->addComponent(sprite2);
+		}
+	}*/
 
 }
 
@@ -124,6 +143,8 @@ void NetworkGame::close() {
 
 	scene_->finish();
 	delete scene_;
+
+	delete tex_loader_;
 
 	SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);

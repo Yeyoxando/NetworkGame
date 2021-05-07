@@ -100,7 +100,7 @@ project "NetworkServer"
 
 	--Common files
 	files{
-		"./include/game_data.h",
+		"./include/network_data.h",
 		"./include/network_helpers.h",
 		"./tests/server_main.cpp",
 

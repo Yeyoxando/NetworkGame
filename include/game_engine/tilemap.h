@@ -8,6 +8,9 @@
 #define __TILEMAP_H__
 
 // ------------------------------------------------------------------------- //
+// Extra note AI: Make waypoints along the map and calculate only a little A* path to get to one of them, if the character collides with something recalculate
+// from 0 to 5 or something are walkable tiles, anything else is not, this will be used for 
+// the collision map, involving AI, building mechanics and everything else
 
 // Includes
 

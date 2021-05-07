@@ -11,7 +11,7 @@
 
 #include "game_object.h"
 
-#define MAX_GAME_OBJECTS 256
+#define MAX_GAME_OBJECTS 2048
 
 class Scene {
 public:

@@ -61,6 +61,18 @@ class Sprite : public Component{
       *        will be loaded with the default_sprite_folder const)
     */
     Sprite(GameObject& gameobject, const char* file_name);
+
+    /**
+      * @brief Parameterized Sprite load image constructor for a subsprite
+      * @param gameobject GameObject that the component will belongs
+      * @param file_name name of the image to load (Only name, the folder
+      *        will be loaded with the default_sprite_folder const)
+      * @param x_pos starting position in x axis
+      * @param y_pos starting position in y axis
+      * @param x_size horizontal size of sprite
+      * @param y_size vertical size of sprite
+    */
+    Sprite(GameObject& gameobject, const char* file_name, int x_pos, int y_pos, int x_size, int y_size);
     
     /**
       * @brief Parameterized Sprite load buffer constructor 
@@ -137,15 +149,14 @@ class Sprite : public Component{
 //------------------------------ Atributtes ---------------------------------//
 
     static unsigned char default_texture[16];
-    char img_name_[128];
     PivotPoint pivot_point_;
 	  int pivot_selection_;
     
   protected:
 //------------------------------ Atributtes ---------------------------------//
-    SDL_Surface* img_;
     SDL_Texture* texture_;
     SDL_Rect render_rect_;
+    SDL_Rect sub_sprite_rect_;
     SpriteOrigin origin_;
 };
 

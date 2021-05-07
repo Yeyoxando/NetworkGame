@@ -9,8 +9,9 @@
 
 // ------------------------------------------------------------------------- //
 
-#include "game_data.h"
+#include "network_data.h"
 #include "scene.h"
+#include "texture_loader.h"
 
 #include <../deps/SDL2-2.0.14/include/SDL.h>
 #include <../deps/SDL2_image-2.0.5/include/SDL_image.h>
@@ -44,6 +45,7 @@ public:
 
 private:
 	Scene* scene_;
+	TextureLoader* tex_loader_;
 
 	SDL_Window* window_;
 	SDL_Renderer* renderer_;
@@ -51,6 +53,7 @@ private:
 	SDL_Event events_;
 
 
+	friend class TextureLoader;
 	friend class GameObject;
 	friend class Sprite;
 	friend class Label;

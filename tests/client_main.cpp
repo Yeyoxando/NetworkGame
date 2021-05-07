@@ -94,8 +94,10 @@ static DWORD socket_thread(void* game_data) {
 // ------------------------------------------------------------------------- //
 
 int main(int argc, char* argv[]) {
-  double current_time, last_time;
-  unsigned char fps = 60;
+	const int fps = 60;
+	const int frame_delay = 1000 / fps;
+	uint32_t frame_start;
+	int frame_time;
 
 	//Winsock variables
 	WSADATA wsa;
@@ -120,24 +122,24 @@ int main(int argc, char* argv[]) {
   CreateThread(nullptr, 0, socket_thread, (void*)game, 0, nullptr);
 	Sleep(200);
 
-
   // Game loop
   while (!game->window_should_close_ || !connection_running){ // Not works by closing it from the console
 
     // last time
+		frame_start = SDL_GetTicks();
 
 
-    // Input
     game->input();
-
-    // Update
     game->update();
-		
-    // Draw
     game->draw();
     
-    // get frame time
 
+    // get frame time
+		frame_time = SDL_GetTicks() - frame_start;
+		// limit
+		if (frame_delay > frame_time) {
+			SDL_Delay(frame_delay - frame_time);
+		}
 
   }
 

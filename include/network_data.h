@@ -10,10 +10,31 @@
 
 // ------------------------------------------------------------------------- //
 
-#ifndef __GAME_DATA_H__
-#define __GAME_DATA_H__
+#ifndef __NETWORK_DATA_H__
+#define __NETWORK_DATA_H__
 
 // ------------------------------------------------------------------------- //
+/*
+UnitData{ 
+	id
+	position, 
+	life
+	whatever needed to send 
+}
+
+BuildData{
+	position
+	build_kind
+	hit_points
+	etc
+}
+
+ServerUpdate{
+	When the game ticks it'll send one of these
+	It will make the players' buildings tick and consume/produce resources
+}
+
+*/
 
 //Indicates the kind of the package
 enum DataPackageKind {
@@ -49,4 +70,4 @@ struct DataPackage {
 
 // ------------------------------------------------------------------------- //
 
-#endif // __GAME_DATA_H__
+#endif // __NETWORK_DATA_H__

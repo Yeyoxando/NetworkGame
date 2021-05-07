@@ -9,7 +9,7 @@
 #include <winsock2.h>
 #include <stdio.h>
 
-#include "game_data.h"
+#include "network_data.h"
 #include "network_helpers.h"
 
 // ------------------------------------------------------------------------- //
