@@ -49,7 +49,7 @@ Sprite::Sprite(GameObject& gameobject, const Sprite& other){
   img_ = IMG_Load(src);
 
   if (img_ == nullptr) {
-    //Editor::log.AddLog("\n[" _error_ "] Error in [%s]: Sprite source (%s) doesn't exist. Check name.", __FUNCTION__, other.img_name_);
+    printf("\n[ _error_ ] Error in [%s]: Sprite source (%s) doesn't exist. Check name.", __FUNCTION__, other.img_name_);
     origin_ = kSpriteOrigin_Null;
   }
   else {
@@ -79,7 +79,7 @@ Sprite::Sprite(GameObject& gameobject, const char* file_name){
   pivot_selection_ = 8;
 
   if(img_ == nullptr){
-		//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: Sprite source (%s) doesn't exist. Check name.", __FUNCTION__, file_name);
+		printf("\n[ _error_ ] Error in [%s]: Sprite source (%s) doesn't exist. Check name.", __FUNCTION__, file_name);
     origin_ = kSpriteOrigin_Null;
   }
   else{
@@ -209,7 +209,7 @@ void Sprite::update() {
 
 void Sprite::draw(){
   if(origin_ != kSpriteOrigin_Null){
-    SDL_Rect rect_instance;
+    SDL_Rect rect_instance = { 0, 0, 0, 0 };
     rect_instance.x = (int)gameobject_->transform_.position_.x -
                       (int)(width() / 2 * gameobject_->transform_.scale_.x);
     rect_instance.y = (int)gameobject_->transform_.position_.y -
@@ -266,8 +266,8 @@ void Sprite::draw(){
 	  }
 	}
 
-	SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_, NULL, &rect_instance,
-		rotation_degrees, &final_pivot, SDL_FLIP_NONE);
+	int what = SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_, NULL, &rect_instance,
+	  rotation_degrees, &final_pivot, SDL_FLIP_NONE);
   }
 }
 

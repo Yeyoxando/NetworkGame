@@ -50,7 +50,12 @@ void NetworkGame::init() {
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);
 	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
 
+	scene_ = new Scene();
 	scene_->init();
+
+	NetworkGame::instance().window_ = window_;
+	NetworkGame::instance().renderer_ = renderer_;
+	NetworkGame::instance().scene_ = scene_;
 
 }
 
@@ -67,9 +72,12 @@ void NetworkGame::loadResources() {
 void NetworkGame::loadGame() {
 
 	// Create game objects and map.
+	Scene* scene = scene_;
 
 	GameObject* g1 = GameObject::CreateGameObject();
-
+	Sprite* sprite = new Sprite(*g1, "tileset.png");
+	sprite->set_pivotPoint(kPivotPoint_Center);
+	g1->addComponent(sprite);
 
 }
 
@@ -105,8 +113,8 @@ void NetworkGame::draw() {
 	// Draw things
 	scene_->draw();
 
-	SDL_RenderClear(renderer_);
 	SDL_RenderPresent(renderer_);
+	SDL_RenderClear(renderer_);
 
 }
 
@@ -115,6 +123,7 @@ void NetworkGame::draw() {
 void NetworkGame::close() {
 
 	scene_->finish();
+	delete scene_;
 
 	SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);

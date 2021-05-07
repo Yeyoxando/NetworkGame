@@ -9,10 +9,14 @@
 //----------------------------- Constructors --------------------------------//
 
 Scene::Scene() {
+
+	game_objects_ = std::vector<GameObject*>();
   
 }
 
 Scene::Scene(const Scene& other) {
+
+	game_objects_ = other.game_objects_;
 
 }
 
@@ -25,17 +29,22 @@ Scene::~Scene() {
 //---------------------------------------------------------------------------//
 
 //----------------------------- Initializers --------------------------------//
+
 void Scene::init() {
   
+
 }
 
 //---------------------------------------------------------------------------//
 
 //-------------------------------- Methods ----------------------------------//
+
 void Scene::addGameObject(GameObject *game_object) {
+
   if (nullptr != game_object) {
     game_objects_.push_back(game_object);
   }
+
 }
 
 void Scene::deleteGameObject(unsigned int index) {
@@ -78,7 +87,7 @@ void Scene::update() {
   //       A reference to the scene could be used in the game object to get all the other objects
   //       The check collision method could be modifies to accept only the other collider or implemented an overload with only one parameter
   //       The check fails sometimes because the chipmunk collision happens before the boxcollider collision, solution: make slightly bigger boxcolliders
-  unsigned int i = 1;
+ /* unsigned int i = 1;
   BoxCollider *collider_1 = nullptr;
   BoxCollider *collider_2 = nullptr;
   for (auto &go : game_objects_) {
@@ -102,7 +111,8 @@ void Scene::update() {
       }
     }
     ++i;
-  }
+  }*/
+
 }
 
 void Scene::draw() {

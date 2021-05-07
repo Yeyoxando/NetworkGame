@@ -134,7 +134,7 @@ GameObject* GameObject::CreateGameObject() {
     return go;
   }
   else {
-		//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
+    printf("\n[ _error_ ] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
     return nullptr;
   }
 }
@@ -146,7 +146,7 @@ GameObject* GameObject::CreateGameObject(const int id, const char tag_id, const 
 		return go;
 	}
 	else {
-		//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
+    printf("\n[ _error_ ] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
 		return nullptr;
 	}
 }
@@ -159,7 +159,7 @@ GameObject* GameObject::CreateGameObject(glm::vec3 position) {
     return go;
   }
   else {
-		//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
+    printf("\n[ _error_ ] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
     return nullptr;
   }
 }
@@ -171,7 +171,7 @@ GameObject* GameObject::CreateGameObject(const GameObject& other) {
     return go;
   }
   else {
-		//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
+    printf("\n[ _error_ ] Error in [%s]: GameObject limit reached (%d).", __FUNCTION__, MAX_GAME_OBJECTS);
     return nullptr;
   }
 }
@@ -244,11 +244,11 @@ void GameObject::addComponent(Component* comp) {
       ++components_count_;
     }
     else {
-			//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: GameObject already contains this component.", __FUNCTION__);
+			printf("\n[ _error_ ] Error in [%s]: GameObject already contains this component.", __FUNCTION__);
     }
   }
   else {
-		//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: Component null or not valid.", __FUNCTION__);
+    printf("\n[ _error_ ] Error in [%s]: Component null or not valid.", __FUNCTION__);
   }
 }
 
@@ -286,7 +286,7 @@ Component* GameObject::getComponent(ComponentKind comp) {
       return components_[i];
     }
   }
-	//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: GameObject doesn't have any component of this kind.", __FUNCTION__);
+  printf("\n[ _error_ ] Error in [%s]: GameObject doesn't have any component of this kind.", __FUNCTION__);
   return nullptr;
 }
 
@@ -305,6 +305,6 @@ void GameObject::removeComponent(ComponentKind comp) {
     --components_count_;
   }
   else {
-		//Editor::log.AddLog("\n[" _error_ "] Error in [%s]: GameObject doesn't have any component of this kind.", __FUNCTION__);
+    printf("\n[ _error_ ] Error in [%s]: GameObject doesn't have any component of this kind.", __FUNCTION__);
   }
 }

@@ -37,7 +37,7 @@ enum PivotPoint{
 };
 
 /// @brief default route source to load images
-const char default_sprite_folder[] = "../data/images/";
+const char default_sprite_folder[] = "../../../data/images/";
 
 class Sprite : public Component{
   public:
