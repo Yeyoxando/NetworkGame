@@ -17,6 +17,10 @@
 #include <SDL.h>
 
  // ------------------------------------------------------------------------- //
+struct SubSprite {
+	const char* tex_name_;
+	SDL_Rect rect_;
+};
 
 class TextureLoader {
 public:
@@ -25,10 +29,14 @@ public:
 
 	//File route set internally.
 	SDL_Texture* loadTexture(const char* file_name, int* width, int* height);
+	
+	int loadSubSprite(const char* file_name, SDL_Texture** texture, int pos_x, int pos_y, int width, int height);
 
 protected:
 	std::map <const char*, SDL_Texture*> textures_;
-	std::map <int, SDL_Rect> sub_sprites_;
+	std::map <int, SubSprite> sub_sprites_;
+
+	friend class Sprite;
 
 };
 

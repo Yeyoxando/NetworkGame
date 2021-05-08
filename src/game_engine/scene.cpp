@@ -32,6 +32,8 @@ Scene::~Scene() {
 
 void Scene::init() {
   
+  map_ = new Tilemap();
+  map_->loadSubSprites();
 
 }
 
@@ -116,6 +118,8 @@ void Scene::update() {
 }
 
 void Scene::draw() {
+  map_->draw();
+
   for (auto &go : game_objects_) {
     go->draw();
   }
@@ -125,6 +129,8 @@ void Scene::finish() {
   while (game_objects_.size() > 0) {
     deleteLastGameObject();
   }
+
+  delete map_;
 }
 
 //---------------------------------------------------------------------------//

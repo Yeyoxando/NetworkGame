@@ -78,6 +78,10 @@ typedef struct SDL_Rect
 {
     int x, y;
     int w, h;
+
+		bool operator==(SDL_Rect& other) const {
+			return x == other.x && y == other.y && w == other.w && h == other.h;
+		}
 } SDL_Rect;
 
 

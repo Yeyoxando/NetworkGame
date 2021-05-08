@@ -44,20 +44,23 @@ void NetworkGame::init() {
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
+
 	window_ = SDL_CreateWindow("Network game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 400, SDL_WINDOW_SHOWN);
+	NetworkGame::instance().window_ = window_;
 	
+
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);
 	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+	NetworkGame::instance().renderer_ = renderer_;
+
+
+	tex_loader_ = new TextureLoader();
+	NetworkGame::instance().tex_loader_ = tex_loader_;
+
 
 	scene_ = new Scene();
 	scene_->init();
-
-	tex_loader_ = new TextureLoader();
-
-	NetworkGame::instance().window_ = window_;
-	NetworkGame::instance().renderer_ = renderer_;
 	NetworkGame::instance().scene_ = scene_;
-	NetworkGame::instance().tex_loader_ = tex_loader_;
 
 }
 
@@ -79,10 +82,10 @@ void NetworkGame::loadGame() {
 	// Create game objects and map.
 	Scene* scene = scene_;
 
-	GameObject* g1 = GameObject::CreateGameObject();
+	/*GameObject* g1 = GameObject::CreateGameObject();
 	Sprite* sprite = new Sprite(*g1, "../../../data/images/tileset.png");
 	g1->transform_.position_ = glm::vec3(276.0f, 210.0f, 0);
-	g1->addComponent(sprite);
+	g1->addComponent(sprite);*/
 
 	/*GameObject* g2 = GameObject::CreateGameObject();
 	Sprite* sprite2 = new Sprite(*g2, "../../../data/images/terrain.png", 96, 0, 16, 16);
@@ -92,7 +95,13 @@ void NetworkGame::loadGame() {
 	/*for (int y = 0; y < 25; ++y) {
 		for (int x = 0; x < 38; ++x) {
 			GameObject* g2 = GameObject::CreateGameObject();
-			Sprite* sprite2 = new Sprite(*g2, "../../../data/images/terrain.png", 96, 0, 16, 16);
+			Sprite* sprite2;
+			if (x == 20 && y == 10) {
+				sprite2 = new Sprite(*g2, "../../../data/images/objects.png", 96, 0, 16, 16);
+			}
+			else {
+				sprite2 = new Sprite(*g2, "../../../data/images/terrain.png", 48, 0, 16, 16);
+			}
 			g2->transform_.position_ = glm::vec3(8.0f + x * 16.0f, 8.0f + y * 16.0f, 0);
 			g2->addComponent(sprite2);
 		}

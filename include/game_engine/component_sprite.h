@@ -156,8 +156,9 @@ class Sprite : public Component{
 //------------------------------ Atributtes ---------------------------------//
     SDL_Texture* texture_;
     SDL_Rect render_rect_;
-    SDL_Rect sub_sprite_rect_;
+    int sub_sprite_id_;
     SpriteOrigin origin_;
+
 };
 
 #endif

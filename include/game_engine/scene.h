@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "game_object.h"
+#include "tilemap.h"
 
 #define MAX_GAME_OBJECTS 2048
 
@@ -58,6 +59,7 @@ public:
 
   //------------------------------ Attributes ---------------------------------//
 
+  Tilemap* map_;
 	std::vector<GameObject*> game_objects_;
 	int id_;
 

@@ -12,7 +12,8 @@
 // from 0 to 5 or something are walkable tiles, anything else is not, this will be used for 
 // the collision map, involving AI, building mechanics and everything else
 
-// Includes
+#include <vector>
+#include "texture_loader.h"
 
 // ------------------------------------------------------------------------- //
 
@@ -21,7 +22,16 @@ public:
   Tilemap();
   ~Tilemap();
 
+  void loadSubSprites();
+
+  //void loadMap(const int map[950]);
+  void draw();
+
 protected:
+  int static_map_[950];
+  int dinamyc_map_[950];
+  std::vector<SubSprite> sub_sprite_refs_;
+  //std::vector<SDL_Texture*> textures_;
 
 };
 

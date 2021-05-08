@@ -10,6 +10,7 @@
 #include <SDL_image.h>
 #include "component_sprite.h"
 #include "network_game.h"
+#include "texture_loader.h"
 #include "game_object.h"
 
 /*struct ExampleAppLog {
@@ -29,6 +30,7 @@ Sprite::Sprite(){
   printf("\n***ERROR*** Do not call Sprite default constructor." \
     "(Needs a GameObject reference). Use instead another constructor");
 #endif // DEBUG_
+  sub_sprite_id_ = -1;
 }
 
 Sprite::Sprite(GameObject& gameobject, const Sprite& other){
@@ -43,7 +45,8 @@ Sprite::Sprite(GameObject& gameobject, const char* file_name){
   component_tag_ = kComponentKind_Sprite;
   gameobject_ = &gameobject;
   pivot_point_ = kPivotPoint_TopLeft;
-  pivot_selection_ = 8;
+	pivot_selection_ = 8;
+	sub_sprite_id_ = -1;
 
   int width, height;
 	texture_ = NetworkGame::instance().tex_loader_->loadTexture(file_name, &width, &height);
@@ -58,7 +61,6 @@ Sprite::Sprite(GameObject& gameobject, const char* file_name){
     render_rect_ = {0, 0, 0, 0};
     render_rect_.w = width;
 		render_rect_.h = height;
-		sub_sprite_rect_ = {-1, -1, -1, -1};
     gameobject_->transform_.size_ = { (float)width, (float)height };
   }
 }
@@ -67,7 +69,8 @@ Sprite::Sprite(GameObject& gameobject, int width, int height, const unsigned cha
   id_ = total_components_;
   component_tag_ = kComponentKind_Sprite;
   gameobject_ = &gameobject;
-  pivot_point_ = kPivotPoint_TopLeft;
+	pivot_point_ = kPivotPoint_TopLeft;
+	sub_sprite_id_ = -1;
   SDL_Surface* img = SDL_CreateRGBSurfaceWithFormatFrom((void*)buffer, width, height,
                                             32, 4*width, SDL_PIXELFORMAT_RGBA8888);
   if(img == nullptr){
@@ -79,7 +82,6 @@ Sprite::Sprite(GameObject& gameobject, int width, int height, const unsigned cha
     render_rect_ = { 0, 0, 0, 0 };
     render_rect_.w = width;
     render_rect_.h = height;
-    sub_sprite_rect_ = { -1, -1, -1, -1 };
   }
 }
 
@@ -93,7 +95,7 @@ Sprite::Sprite(GameObject& gameobject, const char* file_name, int x_pos, int y_p
 	pivot_selection_ = 8;
 
 	int width, height;
-	texture_ = NetworkGame::instance().tex_loader_->loadTexture(file_name, &width, &height);
+	sub_sprite_id_ = NetworkGame::instance().tex_loader_->loadSubSprite(file_name, &texture_, x_pos, y_pos, x_size, y_size);
 
 
 	if (texture_ == nullptr) {
@@ -105,7 +107,6 @@ Sprite::Sprite(GameObject& gameobject, const char* file_name, int x_pos, int y_p
 		render_rect_ = { 0, 0, x_size, y_size };
 		render_rect_.w = x_size;
 		render_rect_.h = y_size;
-    sub_sprite_rect_ = { x_pos, y_pos, x_size, y_size };
 		gameobject_->transform_.size_ = { (float)x_size, (float)y_size };
 	}
 
@@ -159,7 +160,7 @@ void Sprite::initFromBuffer(int width, int height, const unsigned char* buffer){
     render_rect_ = {0, 0, 0, 0};
     render_rect_.w = width;
 		render_rect_.h = height;
-    sub_sprite_rect_ = { -1, -1, -1, -1 };
+    sub_sprite_id_ =  -1;
   }
 }
 
@@ -254,9 +255,10 @@ void Sprite::draw(){
     }
     }
 
-    if (sub_sprite_rect_.x != -1) {
-      SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_, &sub_sprite_rect_, &rect_instance,
-        rotation_degrees, &final_pivot, SDL_FLIP_NONE);
+    if (sub_sprite_id_ != -1) {
+      SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_, 
+        &NetworkGame::instance().tex_loader_->sub_sprites_.at(sub_sprite_id_).rect_,
+        &rect_instance, rotation_degrees, &final_pivot, SDL_FLIP_NONE);
     }
     else {
       SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_, NULL, &rect_instance,
@@ -322,9 +324,10 @@ void Sprite::draw(Transform transform) {
 		}
 		}
     
-    if (sub_sprite_rect_.x != -1) {
-			SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_, &sub_sprite_rect_, &rect_instance,
-				rotation_degrees, &final_pivot, SDL_FLIP_NONE);
+		if (sub_sprite_id_ != -1) {
+			SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_,
+				&NetworkGame::instance().tex_loader_->sub_sprites_.at(sub_sprite_id_).rect_,
+				&rect_instance, rotation_degrees, &final_pivot, SDL_FLIP_NONE);
     }
 		else {
 			SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture_, NULL, &rect_instance,

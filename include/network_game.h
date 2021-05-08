@@ -44,16 +44,17 @@ public:
 	TransformTest p2;
 
 private:
-	Scene* scene_;
-	TextureLoader* tex_loader_;
-
 	SDL_Window* window_;
 	SDL_Renderer* renderer_;
 
 	SDL_Event events_;
 
+	Scene* scene_;
+	TextureLoader* tex_loader_;
+
 
 	friend class TextureLoader;
+	friend class Tilemap;
 	friend class GameObject;
 	friend class Sprite;
 	friend class Label;
