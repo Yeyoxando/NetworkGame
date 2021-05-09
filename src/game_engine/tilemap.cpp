@@ -30,10 +30,10 @@ Tilemap::~Tilemap(){
 
 void Tilemap::loadSubSprites(){
 
-	// 0: grass
+	// 0: grass player 1
 	sub_sprite_refs_.push_back({ "../../../data/images/terrain.png", {48, 0, 16, 16 } });
-	// 1: grass w/ flowers
-	sub_sprite_refs_.push_back({ "../../../data/images/terrain.png", {96, 0, 16, 16 } });
+	// 1: grass player 2
+	sub_sprite_refs_.push_back({ "../../../data/images/terrain.png", {48, 0, 16, 16 } });
 	// 2: trees
 	sub_sprite_refs_.push_back({ "../../../data/images/terrain.png", {224, 192, 16, 16 } });
 	// 3:P1 castle 1
@@ -110,6 +110,14 @@ void Tilemap::loadSubSprites(){
 	sub_sprite_refs_.push_back({ "../../../data/images/terrain.png", {48, 96, 16, 16 } });
 	// 39: pathway bottom left
 	sub_sprite_refs_.push_back({ "../../../data/images/terrain.png", {64, 96, 16, 16 } });
+	// 40: P1 tent barracks
+	sub_sprite_refs_.push_back({ "../../../data/images/objects.png", {64, 64, 16, 16 } });
+	// 41: P2 tent barracks
+	sub_sprite_refs_.push_back({ "../../../data/images/objects.png", {48, 64, 16, 16 } });
+	// 42: P1 tent barracks rotated
+	sub_sprite_refs_.push_back({ "../../../data/images/objects.png", {96, 32, 16, 16 } });
+	// 43: P2 tent barracks rotated
+	sub_sprite_refs_.push_back({ "../../../data/images/objects.png", {80, 32, 16, 16 } });
 
 
 	for (int i = 0; i < sub_sprite_refs_.size(); ++i) {

@@ -24,15 +24,23 @@ public:
   ~Tilemap();
 
   enum TileKind {
-    kTileKind_Buildable = 0,
-    kTileKind_Walkable = 1,
-    kTileKind_Blocked = 2
+    kTileKind_Blocked = 0,
+    kTileKind_RoadBuildable = 1,
+    kTileKind_FieldBuildable = 2,
+    kTileKind_Tree = 3,
+    kTileKind_Rock = 4,
+    kTileKind_FarmGrass = 5,
+    kTileKind_Tower = 6,
+    kTileKind_House = 7,
+    kTileKind_Walkable = 8,
   };
 
   void loadSubSprites();
 
   int checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind);
   int checkEightAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind);
+
+  //get buildable tiles(player id, field/road) (used when building mode)
 
   //void loadMap(const int map[950]);
   void draw();

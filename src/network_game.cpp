@@ -80,7 +80,7 @@ void NetworkGame::loadResources() {
 void NetworkGame::loadGame() {
 
 	// Create game objects and map.
-	Scene* scene = scene_;
+	//Scene* scene = scene_;
 
 	/*GameObject* g1 = GameObject::CreateGameObject();
 	Sprite* sprite = new Sprite(*g1, "../../../data/images/terrain.png", 192, 352, 32, 32);
@@ -88,25 +88,10 @@ void NetworkGame::loadGame() {
 		, 160.0f, 0);
 	g1->addComponent(sprite);*/
 
-	GameObject* g2 = GameObject::CreateGameObject();
+	/*GameObject* g2 = GameObject::CreateGameObject();
 	Sprite* sprite2 = new Sprite(*g2, "../../../data/images/objects.png", 80, 48, 16, 32);
 	g2->transform_.position_ = glm::vec3(480.0f + 8.0f, 224.0f, 0);
-	g2->addComponent(sprite2);
-
-	/*for (int y = 0; y < 25; ++y) {
-		for (int x = 0; x < 38; ++x) {
-			GameObject* g2 = GameObject::CreateGameObject();
-			Sprite* sprite2;
-			if (x == 20 && y == 10) {
-				sprite2 = new Sprite(*g2, "../../../data/images/objects.png", 96, 0, 16, 16);
-			}
-			else {
-				sprite2 = new Sprite(*g2, "../../../data/images/terrain.png", 48, 0, 16, 16);
-			}
-			g2->transform_.position_ = glm::vec3(8.0f + x * 16.0f, 8.0f + y * 16.0f, 0);
-			g2->addComponent(sprite2);
-		}
-	}*/
+	g2->addComponent(sprite2);*/
 
 }
 
