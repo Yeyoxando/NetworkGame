@@ -15,6 +15,7 @@
 Tilemap::Tilemap(){
 
 	sub_sprite_refs_ = std::vector<SubSprite>(0);
+	draw_grid_ = false;
 
 }
 
@@ -149,6 +150,7 @@ int Tilemap::checkEightAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind){
 
 void Tilemap::draw(){
 
+	// Base map
 	for (int y = 0; y < 25; ++y) {
 		for (int x = 0; x < 38; ++x) {
 			int tile_value = basic_map[x + y * 38];
@@ -171,6 +173,8 @@ void Tilemap::draw(){
 				&rect_instance, rotation_degrees, &final_pivot, SDL_FLIP_NONE);
 		}
 	}
+
+	// Detail map
 	for (int y = 0; y < 25; ++y) {
 		for (int x = 0; x < 38; ++x) {
 			int tile_value = detail_map[x + y * 38];
@@ -192,6 +196,19 @@ void Tilemap::draw(){
 			SDL_RenderCopyEx(NetworkGame::instance().renderer_, texture,
 				&sub_sprite_refs_[tile_value].rect_,
 				&rect_instance, rotation_degrees, &final_pivot, SDL_FLIP_NONE);
+		}
+	}
+
+	// Grid
+	if (draw_grid_) {
+		SDL_SetRenderDrawColor(NetworkGame::instance().renderer_, 255, 0, 0, 255);
+		for (int y = 0; y < 24; ++y) {
+			for (int x = 0; x < 37; ++x) {
+				SDL_RenderDrawLine(NetworkGame::instance().renderer_, 16.0f + 16.0f * x,
+					0.0f, 16.0f + 16.0f * x, 400.0f);
+				SDL_RenderDrawLine(NetworkGame::instance().renderer_, 0.0f,
+					16.0f + 16.0f * y, 608.0f, 16.0f + 16.0f * y);
+			}
 		}
 	}
 

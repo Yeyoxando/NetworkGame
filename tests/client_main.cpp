@@ -47,6 +47,7 @@ static DWORD socket_thread(void* game_data) {
 	recv(sock, (char*)&data, sizeof(DataPackage), 0);
 	if (data.package_kind == kDataPackageKind_Client) {
 		client.id = data.client.id;
+		game->client_id_ = client.id;
 		printf("\nClient %d", client.id);
 	}
 	else {
@@ -105,13 +106,6 @@ int main(int argc, char* argv[]) {
   // Game
   NetworkGame* game = new NetworkGame();
 
-  // Init internal engine things
-  game->init();
-
-  // Init resources and game
-  game->loadResources();
-  game->loadGame();
-
 
 	//Winsock start
 	if (startWinsock(&wsa) != 0) return EXIT_FAILURE;
@@ -122,8 +116,15 @@ int main(int argc, char* argv[]) {
   CreateThread(nullptr, 0, socket_thread, (void*)game, 0, nullptr);
 	Sleep(200);
 
+	// Init internal engine things
+	game->init();
+
+	// Init resources and game
+	game->loadResources();
+	game->loadGame();
+
   // Game loop
-  while (!game->window_should_close_ || !connection_running){ // Not works by closing it from the console
+  while (!game->window_should_close_ || !connection_running){ // Not works by closing it from the console (Debug only)
 
     // last time
 		frame_start = SDL_GetTicks();

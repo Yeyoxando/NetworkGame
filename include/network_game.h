@@ -43,7 +43,10 @@ public:
 	TransformTest p1;
 	TransformTest p2;
 
+	int client_id_;
+
 private:
+	// Engine specific
 	SDL_Window* window_;
 	SDL_Renderer* renderer_;
 
@@ -52,6 +55,14 @@ private:
 	Scene* scene_;
 	TextureLoader* tex_loader_;
 
+	int mouse_pos_x_;
+	int mouse_pos_y_;
+	int transformed_mouse_x_;
+	int transformed_mouse_y_;
+
+	//Game specific
+	bool build_mode_;
+	GameObject* mouse_build_object_;
 
 	friend class TextureLoader;
 	friend class Tilemap;
