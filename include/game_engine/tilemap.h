@@ -13,6 +13,7 @@
 // the collision map, involving AI, building mechanics and everything else
 
 #include <vector>
+#include <glm.hpp>
 #include "texture_loader.h"
 
 // ------------------------------------------------------------------------- //
@@ -22,7 +23,16 @@ public:
   Tilemap();
   ~Tilemap();
 
+  enum TileKind {
+    kTileKind_Buildable = 0,
+    kTileKind_Walkable = 1,
+    kTileKind_Blocked = 2
+  };
+
   void loadSubSprites();
+
+  int checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind);
+  int checkEightAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind);
 
   //void loadMap(const int map[950]);
   void draw();
