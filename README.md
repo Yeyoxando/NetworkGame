@@ -9,16 +9,16 @@ Both of these implemented projects were done by me as college modules' projects 
 All the network, multi-threading and game logic code has been done specifically for this university project.
 
 ### External code
-ImGUI?
-GLM
-...
+Kiwi for UI
+GLM for mathemathics
+SDL2/SDL image/SDL ttf
 
 ## Youtube demo video
 Link
 
 
 ## Game concept
-Kinda simplified AoE
+Simplified Age of Empires mixed with Tower Defense 
 
 ## Game rules and how to play it
 
