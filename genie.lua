@@ -45,10 +45,11 @@ project "NetworkGame"
 	includedirs{
 	  "./include/",
 	  "./include/game_engine/",
+	  "./include/game_script/",
 	  "./src/",
 	  "./tests/",
 	  "./deps/glm/glm/",
-	  "./deps/imgui/",
+	  "./deps/kiwi/src/",
 	  "./deps/SDL2_ttf-2.0.15/include",
 	  "./deps/SDL2-2.0.14/include",
 	  "./deps/SDL2_image-2.0.5/include",
@@ -63,8 +64,10 @@ project "NetworkGame"
 		"./src/game_engine/**.cpp",
 		"./src/game_script/**.cpp",
 		"./tests/client_main.cpp",
-	 	"./deps/imgui/*.h",
-	  	"./deps/imgui/*.cpp",
+
+	  	"./deps/kiwi/src/*.h",
+	  	"./deps/kiwi/src/*.c",
+
 	    	"./deps/SDL2-2.0.14/include/**.h",
 	    	"./deps/SDL2_image-2.0.5/include/**.h",
 	  	"./deps/SDL2_ttf-2.0.15/include/**.h",

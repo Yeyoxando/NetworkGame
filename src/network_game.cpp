@@ -48,7 +48,7 @@ void NetworkGame::init() {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
 
-	window_ = SDL_CreateWindow("Network game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 608, 400, SDL_WINDOW_SHOWN);
+	window_ = SDL_CreateWindow("Network game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 608, 600, SDL_WINDOW_SHOWN);
 	
 
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);

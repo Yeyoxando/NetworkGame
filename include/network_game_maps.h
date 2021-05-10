@@ -4,6 +4,9 @@
  *  e-mail: c0022981@my.shu.ac.uk | yeyoxando@gmail.com
  */
 
+#ifndef __NETWORK_GAME_MAPS_H__
+#define __NETWORK_GAME_MAPS_H__
+
 // ------------------------------------------------------------------------- //
 
 const int p1_build_tiles[] = {0};
@@ -69,3 +72,4 @@ const int detail_map[950] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+#endif // __NETWORK_GAME_MAPS_H__

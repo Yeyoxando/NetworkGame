@@ -24,15 +24,12 @@ public:
   ~Tilemap();
 
   enum TileKind {
-    kTileKind_Blocked = 0,
-    kTileKind_RoadBuildable = 1,
-    kTileKind_FieldBuildable = 2,
-    kTileKind_Tree = 3,
-    kTileKind_Rock = 4,
-    kTileKind_FarmGrass = 5,
-    kTileKind_Tower = 6,
-    kTileKind_House = 7,
-    kTileKind_Walkable = 8,
+    kTileKind_RoadBuildable = 0,
+    kTileKind_FieldBuildable = 1,
+    kTileKind_Tree = 2,
+    kTileKind_FarmGrass = 3,
+    kTileKind_House = 4,
+    kTileKind_Road = 5,
   };
 
   void loadSubSprites();
