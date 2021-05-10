@@ -11,11 +11,13 @@
 
 #include <SDL.h>
 #include "network_game.h"
+#include "network_data.h"
 #include "network_helpers.h"
 
 // ------------------------------------------------------------------------- //
 
 bool connection_running = true;
+HANDLE hThread;
 
 // ------------------------------------------------------------------------- //
 
@@ -29,6 +31,7 @@ static DWORD socket_thread(void* game_data) {
   SOCKET sock;
 	sockaddr_in server_ip;
 	int ip_length = sizeof(server_ip);
+
 	DataPackage data;
 	Client client = { -1 };
 
@@ -56,15 +59,79 @@ static DWORD socket_thread(void* game_data) {
 	}
 
 
-
   while (true) {
+
+		// ResumeThread is called after the main thread update function, so the net thread can run
+		//   in parallel while the update function is not modifying the command list (During render, FPS limit and input from the main thread)
 
     lockMutex();
     if (!connection_running) break;
     unlockMutex();
 
+		// Send info about how many cmds have to receive the server after this one (fixed step)
+		data.package_kind = kDataPackageKind_Header;
+		data.header.sender_id = client.id;
+		data.header.cmd_count_ = game->cmd_list_->commands_.size();
+		send(sock, (char*)&data, sizeof(DataPackage), 0);
+		if (data.header.cmd_count_ > 0) {
+			printf("\nSend");
+		}
+
+		// Send as many commands as have been accumulated in the cmd list (Variable step)
+		while (game->cmd_list_->commands_.cbegin() != game->cmd_list_->commands_.cend()) {
+			data.package_kind = kDataPackageKind_Build;
+			data.build.sender_id = client.id;
+			BuildData* build_data = static_cast<BuildData*>(game->cmd_list_->commands_[0]);
+			data.build.kind_ = (int)build_data->kind_; // Tower
+			data.build.x = build_data->x;
+			data.build.y = build_data->y;
+
+			send(sock, (char*)&data, sizeof(DataPackage), 0);
+
+			game->cmd_list_->commands_.erase(game->cmd_list_->commands_.cbegin());
+		}
+
+		// Receive first packet with num of commands from the other player
+		int receiving_cmd_count = 0;
+		result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
+		if (result > 0) { // Something received
+			if (data.header.cmd_count_ > 0) {
+				receiving_cmd_count = data.header.cmd_count_;
+				printf("\n NumCommands: %d", data.header.cmd_count_);
+			}
+		}
+		else if (result == 0) {
+			printf("\n Lost connection. Game finished.");
+			lockMutex();
+			connection_running = false;
+			unlockMutex();
+			break;
+		}
+
+		// Recv and process while not all commands have been received
+		while (receiving_cmd_count > 0) {
+			result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
+			if (result > 0) { // Something received
+				BuildData* build_data = CreateBuildData(data.build.sender_id, glm::vec2(data.build.x, data.build.y));
+				game->recv_cmd_list_->commands_.push_back(build_data);
+			}
+			else if (result == 0) {
+				printf("\n Lost connection. Game finished.");
+				lockMutex();
+				connection_running = false;
+				unlockMutex();
+				break;
+			}
+
+			receiving_cmd_count--;
+		}
+
+
+		SuspendThread(hThread);
+
+		// OLD
 		//Send user current transform to server
-		data.transform = client.id == 1 ? game->p1 : game->p2;
+		/*data.transform = client.id == 1 ? game->p1 : game->p2;
 		send(sock, (char*)&data, sizeof(DataPackage), 0);
 
     // Receive data from the other user
@@ -83,9 +150,10 @@ static DWORD socket_thread(void* game_data) {
 			connection_running = false;
 			unlockMutex();
 			break;
-		}
+		}*/
   }
 
+	// Send disconnection message
   send(sock, 0, 0, 0);
 
   closesocket(sock);
@@ -104,7 +172,7 @@ int main(int argc, char* argv[]) {
 	WSADATA wsa;
 
   // Game
-  NetworkGame* game = new NetworkGame();
+  NetworkGame* game = &NetworkGame::instance();
 
 
 	//Winsock start
@@ -113,7 +181,7 @@ int main(int argc, char* argv[]) {
   InitializeSRWLock(&mutex);
 
   // Network thread
-  CreateThread(nullptr, 0, socket_thread, (void*)game, 0, nullptr);
+  hThread = CreateThread(nullptr, 0, socket_thread, (void*)game, 0, nullptr);
 	Sleep(200);
 
 	// Init internal engine things
@@ -132,6 +200,7 @@ int main(int argc, char* argv[]) {
 
     game->input();
     game->update();
+		ResumeThread(hThread);
     game->draw();
     
 

@@ -16,17 +16,19 @@ NetworkGame::NetworkGame(){
 	window_ = nullptr;
 	renderer_ = nullptr;
 	tex_loader_ = nullptr;
+	cmd_list_ = new CommandList();
+	recv_cmd_list_ = new CommandList();
 
 	window_should_close_ = false;
-
-	p1 = { 0, 0 };
-	p2 = { 0, 0 };
 
 }
 
 // ------------------------------------------------------------------------- //
 
 NetworkGame::~NetworkGame() {
+
+	delete cmd_list_;
+	delete recv_cmd_list_;
 
 }
 
@@ -47,21 +49,17 @@ void NetworkGame::init() {
 	
 
 	window_ = SDL_CreateWindow("Network game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 608, 400, SDL_WINDOW_SHOWN);
-	NetworkGame::instance().window_ = window_;
 	
 
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);
 	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
-	NetworkGame::instance().renderer_ = renderer_;
 
 
 	tex_loader_ = new TextureLoader();
-	NetworkGame::instance().tex_loader_ = tex_loader_;
 
 
 	scene_ = new Scene();
 	scene_->init();
-	NetworkGame::instance().scene_ = scene_;
 
 }
 
@@ -82,6 +80,7 @@ void NetworkGame::loadGame() {
 
 	// Create game objects and map.
 	//Scene* scene = scene_;
+	build_manager_ = new BuildManager();
 
 	build_mode_ = false;
 
@@ -136,26 +135,8 @@ void NetworkGame::input() {
 	case SDL_MOUSEBUTTONDOWN: {
 		if (events_.button.button == SDL_BUTTON_LEFT) {
 			if (build_mode_) {
-				// Check if the current tile is buildable by this player
-				int tile_value = basic_map[(transformed_mouse_x_ / 16) +
-					((transformed_mouse_y_ / 16) * 38)];
-				if (client_id_ == 2) {
-					if (tile_value == p2_build_tiles[0]) {
-						GameObject* build_object = GameObject::CreateGameObject();
-						Sprite* sprite2 = new Sprite(*build_object, "../../../data/images/objects.png", 80, 48, 16, 32);
-						build_object->transform_.position_ = glm::vec3(transformed_mouse_x_, transformed_mouse_y_, 0);
-						build_object->addComponent(sprite2);
-					}
-				}
-				else {
-					if (tile_value == p1_build_tiles[0]) {
-						// Create the object in the position of the mouse if it is allowed
-						GameObject* build_object = GameObject::CreateGameObject();
-						Sprite* sprite = new Sprite(*build_object, "../../../data/images/terrain.png", 192, 352, 32, 32);
-						build_object->transform_.position_ = glm::vec3(transformed_mouse_x_, transformed_mouse_y_, 0);
-						build_object->addComponent(sprite);
-					}
-				}
+				build_manager_->createBuilding(true, transformed_mouse_x_, transformed_mouse_y_,
+					client_id_, 0);
 			}
 		}
 		break;
@@ -182,7 +163,15 @@ void NetworkGame::update() {
 			transformed_mouse_y_, 0.0f);
 	}
 
-	scene_->update();
+	// Execute other player received commands
+	while (recv_cmd_list_->commands_.cbegin() != recv_cmd_list_->commands_.cend()) {
+		BuildData* build_data = static_cast<BuildData*>(recv_cmd_list_->commands_[0]);
+		build_manager_->createBuilding(false, build_data->x, build_data->y, build_data->sender_id, build_data->kind_);
+
+		recv_cmd_list_->commands_.erase(recv_cmd_list_->commands_.cbegin());
+	}
+
+	NetworkGame::instance().scene_->update();
 	
 }
 
@@ -191,7 +180,7 @@ void NetworkGame::update() {
 void NetworkGame::draw() {
 
 	// Draw things
-	scene_->draw();
+	NetworkGame::instance().scene_->draw();
 
 	SDL_RenderPresent(renderer_);
 	SDL_RenderClear(renderer_);
@@ -201,6 +190,8 @@ void NetworkGame::draw() {
 // ------------------------------------------------------------------------- //
 
 void NetworkGame::close() {
+
+	delete build_manager_;
 
 	scene_->finish();
 	delete scene_;

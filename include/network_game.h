@@ -13,6 +13,8 @@
 #include "scene.h"
 #include "texture_loader.h"
 
+#include "game_script/buildings.h"
+
 #include <../deps/SDL2-2.0.14/include/SDL.h>
 #include <../deps/SDL2_image-2.0.5/include/SDL_image.h>
 
@@ -20,7 +22,6 @@
 
 class NetworkGame {
 public:
-	NetworkGame();
 	~NetworkGame();
 
 	static NetworkGame& instance();
@@ -40,12 +41,11 @@ public:
 
 	bool window_should_close_;
 
-	TransformTest p1;
-	TransformTest p2;
-
 	int client_id_;
 
 private:
+	NetworkGame();
+
 	// Engine specific
 	SDL_Window* window_;
 	SDL_Renderer* renderer_;
@@ -61,8 +61,14 @@ private:
 	int transformed_mouse_y_;
 
 	//Game specific
-	bool build_mode_;
 	GameObject* mouse_build_object_;
+	BuildManager* build_manager_;
+	bool build_mode_;
+
+public:
+	// Network specific
+	CommandList* cmd_list_; // Cmds to send to the server
+	CommandList* recv_cmd_list_; // Cmds to send to the server
 
 	friend class TextureLoader;
 	friend class Tilemap;

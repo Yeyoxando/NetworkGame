@@ -7,7 +7,7 @@
 // ------------------------------------------------------------------------- //
 
 #include <winsock2.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 #include "network_data.h"
 #include "network_helpers.h"
@@ -16,17 +16,18 @@
 
 static int connected_clients = 0;
 bool player_disconnected = false;
+static SOCKET client_sock[2];
 
 // ------------------------------------------------------------------------- //
 
-static DWORD client_thread(void* user_data) {
+static DWORD client_thread(void* client_socket) {
   
-  SOCKET sock = (SOCKET)user_data;
+  SOCKET sock = (SOCKET)client_socket;
   int result = 0;
   int count = 0;
-
+  int client_thread_id = -1;
 	DataPackage data;
-	TransformTest transforms[2];
+  std::vector<DataPackage> data_packages = std::vector<DataPackage>(0);
 
 
   lockMutex();
@@ -38,6 +39,7 @@ static DWORD client_thread(void* user_data) {
 	//Prepare client package to set player id
 	data.package_kind = kDataPackageKind_Client;
 	data.client.id = count;
+	client_thread_id = count;
 	//Send package
 	send(sock, (char*)&data, sizeof(DataPackage), 0);
 
@@ -50,8 +52,75 @@ static DWORD client_thread(void* user_data) {
     if (player_disconnected) break;
     unlockMutex();
 
-		//Receive transform from player
+    int receiving_cmd_count = 0;
+	  // Receive first packet with num of commands to execute
 		result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
+		if (result > 0) { // Something received
+      if (data.header.cmd_count_ > 0) {
+        receiving_cmd_count = data.header.cmd_count_;
+        printf("\n NumCommands: %d", data.header.cmd_count_);
+      }
+		}
+		else if (result == 0) {
+			lockMutex();
+			count = --connected_clients;
+			player_disconnected = true;
+			unlockMutex();
+
+			printf("\n A player has disconnected from the game.");
+			break;
+		}
+		else {
+			printf("\n Player %d data receive failed.", count);
+		}
+
+	  // Recv and process while not all commands have been received
+    while (receiving_cmd_count > 0) {
+			result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
+			if (result > 0) { // Something received
+				// Get build command and send to the other player
+        data_packages.push_back(data);
+			}
+			else if (result == 0) {
+				lockMutex();
+				count = --connected_clients;
+				player_disconnected = true;
+				unlockMutex();
+
+				printf("\n A player has disconnected from the game.");
+				break;
+			}
+			else {
+				printf("\n Player %d data receive failed.", count);
+			}
+      
+      receiving_cmd_count--;
+    }
+
+		// Send first packet with number of commands
+		// Send info about how many cmds have to receive the other player after this one (fixed step)
+		data.package_kind = kDataPackageKind_Header;
+		data.header.sender_id = client_thread_id;
+		data.header.cmd_count_ = data_packages.size();
+    int opponent_socket = count == 1 ? 1 : 0;
+		send(client_sock[opponent_socket], (char*)&data, sizeof(DataPackage), 0);
+		if (data.header.cmd_count_ > 0) {
+			printf("\nSend data to the other player");
+		}
+
+	  // Send while not all commands have been sent
+		// Send as many commands as have been accumulated in the cmd list (Variable step)
+		while (data_packages.cbegin() != data_packages.cend()) {
+			DataPackage data_to_opponent = data_packages[0];
+
+			send(client_sock[opponent_socket], (char*)&data_to_opponent, sizeof(DataPackage), 0);
+
+			data_packages.erase(data_packages.cbegin());
+		}
+
+    // OLD
+		//Receive transform from player
+		/*result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
 		if (result > 0) {
 			//printf("\n Data received player %d: Transform. X: %d. Y: %d", count, data.transform.x, data.transform.y);
       lockMutex();
@@ -82,10 +151,11 @@ static DWORD client_thread(void* user_data) {
     unlockMutex();
 
     send(sock, (char*)&data, sizeof(DataPackage), 0);
-
+    */
 	}
 
-  send(sock, 0, 0, 0);
+	int opponent_socket = count == 1 ? 1 : 0;
+  send(client_sock[opponent_socket], 0, 0, 0);
 
   closesocket(sock);
 
@@ -99,7 +169,6 @@ int main() {
   // Winsock variables
   WSADATA wsa;
   SOCKET sock;
-  SOCKET client_sock[2];
   sockaddr_in server_ip;
   sockaddr_in clients_ip[2];
   int ip_length = sizeof(server_ip);
@@ -108,7 +177,6 @@ int main() {
 
   //Server variables
   DataPackage data;
-  TransformTest transforms[2];
 
 	//Winsock start
   if (startWinsock(&wsa) != 0) return EXIT_FAILURE;
