@@ -37,7 +37,7 @@ public:
 
   void loadSubSprites();
 
-  int checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind);
+  bool checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind);
   int checkEightAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind);
 
   //get buildable tiles(player id, field/road) (used when building mode)

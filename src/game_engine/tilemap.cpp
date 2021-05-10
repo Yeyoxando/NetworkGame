@@ -132,9 +132,38 @@ void Tilemap::loadSubSprites(){
 
 // ------------------------------------------------------------------------- //
 
-int Tilemap::checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind){
+bool Tilemap::checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind){
+	int x = (int)tile_pos.x / 16;
+	int y = (int)tile_pos.y / 16;
 
-	return 0;
+	switch (tile_kind){
+	case kTileKind_RoadBuildable: {
+		for (int i = 0; i < 6; ++i) {
+			if (basic_map[x + ((y - 1) * 38)] == road_tiles[i]) { // Top
+				return true;
+			}
+			if (basic_map[(x + 1) + (y * 38)] == road_tiles[i]) { // Right
+				return true;
+			}
+			if (basic_map[x + ((y + 1) * 38)] == road_tiles[i]) { // Bottom
+				return true;
+			}
+			if (basic_map[(x - 1) + (y * 38)] == road_tiles[i]) { // Left
+				return true;
+			}
+		}
+		break;
+	}
+	case kTileKind_FieldBuildable: {
+
+		break;
+	}
+	default: {
+		break;
+	}
+	}
+
+	return false;
 
 }
 

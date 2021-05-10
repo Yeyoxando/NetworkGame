@@ -23,8 +23,9 @@ public:
 
 	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind);
 
-	std::vector<Building*> p1_buildings;
-	std::vector<Building*> p2_buildings;
+	bool checkForBuildings(glm::vec2 building_pos);
+
+	std::vector<glm::vec2> built_tiles_;
 protected:
 
 };

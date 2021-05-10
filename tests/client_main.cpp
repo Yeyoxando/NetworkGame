@@ -73,9 +73,9 @@ static DWORD socket_thread(void* game_data) {
 		data.header.sender_id = client.id;
 		data.header.cmd_count_ = game->cmd_list_->commands_.size();
 		send(sock, (char*)&data, sizeof(DataPackage), 0);
-		if (data.header.cmd_count_ > 0) {
-			printf("\nSend");
-		}
+		//if (data.header.cmd_count_ > 0) {
+			//printf("\nSend");
+		//}
 
 		// Send as many commands as have been accumulated in the cmd list (Variable step)
 		while (game->cmd_list_->commands_.cbegin() != game->cmd_list_->commands_.cend()) {
@@ -97,7 +97,6 @@ static DWORD socket_thread(void* game_data) {
 		if (result > 0) { // Something received
 			if (data.header.cmd_count_ > 0) {
 				receiving_cmd_count = data.header.cmd_count_;
-				printf("\n NumCommands: %d", data.header.cmd_count_);
 			}
 		}
 		else if (result == 0) {
