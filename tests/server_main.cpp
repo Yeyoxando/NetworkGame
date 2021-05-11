@@ -71,8 +71,7 @@ static DWORD client_thread(void* client_socket) {
 			break;
 		}
 		else {
-			printf("\n Player %d data receive failed or player disconnected.", count);
-			break;
+			printf("\n Player %d data receive failed.", count);
 		}
 
 	  // Recv and process while not all commands have been received
@@ -92,8 +91,7 @@ static DWORD client_thread(void* client_socket) {
 				break;
 			}
 			else {
-				printf("\n Player %d data receive failed or player disconnected.", count);
-				break;
+				printf("\n Player %d data receive failed.", count);
 			}
       
       receiving_cmd_count--;
@@ -106,9 +104,9 @@ static DWORD client_thread(void* client_socket) {
 		data.header.cmd_count_ = data_packages.size();
     int opponent_socket = count == 1 ? 1 : 0;
 		send(client_sock[opponent_socket], (char*)&data, sizeof(DataPackage), 0);
-		/*if (data.header.cmd_count_ > 0) {
+		if (data.header.cmd_count_ > 0) {
 			printf("\nSend data to the other player");
-		}*/
+		}
 
 	  // Send while not all commands have been sent
 		// Send as many commands as have been accumulated in the cmd list (Variable step)
