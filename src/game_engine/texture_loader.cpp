@@ -79,13 +79,9 @@ int TextureLoader::loadSubSprite(const char* file_name, SDL_Texture** texture, i
 	auto it = sub_sprites_.cbegin();
 	while (it != sub_sprites_.cend()) {
 		if (!strcmp(file_name, it->second.tex_name_)) {
-
-			if (it->second.rect_.x == sub_sprite.rect_.x &&
-					it->second.rect_.y == sub_sprite.rect_.y &&
-					it->second.rect_.w == sub_sprite.rect_.w &&
-					it->second.rect_.h == sub_sprite.rect_.h) {
+			if (it->second.rect_ == sub_sprite.rect_) {
 				// Return if previously loaded
-				//printf("\n[ _warning_ ] Sub sprite [%s] has been loaded earlier.", file_name);
+				//printf("\n[ _warning_ ] Subsprite [%s] has been loaded earlier.", file_name);
 				return it->first;
 			}
 		}
