@@ -48,7 +48,8 @@ void NetworkGame::init() {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
 
-	window_ = SDL_CreateWindow("Network game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 608, 400, SDL_WINDOW_SHOWN);
+	window_ = SDL_CreateWindow("Network game", SDL_WINDOWPOS_CENTERED, 
+		SDL_WINDOWPOS_CENTERED, 608, 600, SDL_WINDOW_SHOWN);
 	
 
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);
@@ -96,9 +97,8 @@ void NetworkGame::loadGame() {
 	mouse_build_object_->addComponent(sprite);
 	mouse_build_object_->active_ = false;
 
-	/*GameObject* g2 = GameObject::CreateGameObject();
-	g2->transform_.position_ = glm::vec3(480.0f + 8.0f, 224.0f, 0);
-	g2->addComponent(sprite2);*/
+	game_menus_ = new GameMenus();
+	game_menus_->initGUI();
 
 }
 
@@ -148,11 +148,15 @@ void NetworkGame::input() {
 
 	SDL_GetMouseState(&mouse_pos_x_, &mouse_pos_y_);
 
+	game_menus_->inputGUI(events_);
+
 }
 
 // ------------------------------------------------------------------------- //
 
 void NetworkGame::update() {
+
+	game_menus_->manageGUI();
 
 	if (build_mode_) {
 		// Fix position with map tiling
@@ -178,11 +182,15 @@ void NetworkGame::update() {
 // ------------------------------------------------------------------------- //
 
 void NetworkGame::draw() {
-
+	
 	// Draw things
 	NetworkGame::instance().scene_->draw();
 
+	game_menus_->drawGUI();
+
+
 	SDL_RenderPresent(renderer_);
+	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
 	SDL_RenderClear(renderer_);
 
 }
@@ -192,6 +200,9 @@ void NetworkGame::draw() {
 void NetworkGame::close() {
 
 	delete build_manager_;
+
+	game_menus_->shutdownGUI();
+	delete game_menus_;
 
 	scene_->finish();
 	delete scene_;

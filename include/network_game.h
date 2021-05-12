@@ -7,11 +7,12 @@
 #ifndef __NETWORK_GAME_H__
 #define __NETWORK_GAME_H__
 
-// ------------------------------------------------------------------------- //
+ // ------------------------------------------------------------------------- //
 
 #include "network_data.h"
 #include "scene.h"
 #include "texture_loader.h"
+#include "game_menus.h"
 
 #include "game_script/buildings.h"
 
@@ -61,6 +62,7 @@ private:
 	int transformed_mouse_y_;
 
 	//Game specific
+	GameMenus* game_menus_;
 	GameObject* mouse_build_object_;
 	BuildManager* build_manager_;
 	bool build_mode_;
@@ -70,6 +72,7 @@ public:
 	CommandList* cmd_list_; // Cmds to send to the server
 	CommandList* recv_cmd_list_; // Cmds to send to the server
 
+	friend class GameMenus;
 	friend class TextureLoader;
 	friend class Tilemap;
 	friend class GameObject;

@@ -30,7 +30,7 @@ protected:
 };
 
 // ------------------------------------------------------------------------- //
-
+// Maybe is better to have these as game object components and everything should be easier
 class Building {
 public:
 	Building();
