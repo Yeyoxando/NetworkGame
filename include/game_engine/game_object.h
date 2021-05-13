@@ -118,7 +118,7 @@ public:
   /**
   * @brief Updates the state of the GameObject and it's components
   */
-  virtual void update();
+  virtual void update(uint32_t time_step);
 
   /**
   * @brief Draws the drawable components on GameObject 
@@ -167,7 +167,7 @@ public:
 	char name_[32];
 
 //---------------------------------------------------------------------------//
-private:
+protected:
 //----------------------------- Constructors --------------------------------//
   /**
    * @brief GameObject constructor

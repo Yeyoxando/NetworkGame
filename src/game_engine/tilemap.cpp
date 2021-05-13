@@ -15,7 +15,6 @@
 Tilemap::Tilemap(){
 
 	sub_sprite_refs_ = std::vector<SubSprite>(0);
-	draw_grid_ = false;
 
 }
 
@@ -200,7 +199,7 @@ void Tilemap::draw(){
 	}
 
 	// Grid
-	if (draw_grid_) {
+	if (NetworkGame::instance().game_menus_->build_mode_) {
 		SDL_SetRenderDrawColor(NetworkGame::instance().renderer_, 255, 0, 0, 255);
 		for (int y = 0; y < 24; ++y) {
 			for (int x = 0; x < 37; ++x) {

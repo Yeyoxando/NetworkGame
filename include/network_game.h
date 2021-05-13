@@ -33,7 +33,7 @@ public:
 	void loadGame();
 
 	void input();
-	void update();
+	void update(uint32_t time_step);
 	void draw();
 
 	void close();
@@ -65,19 +65,23 @@ private:
 	GameMenus* game_menus_;
 	GameObject* mouse_build_object_;
 	BuildManager* build_manager_;
-	bool build_mode_;
 
 public:
 	// Network specific
 	CommandList* cmd_list_; // Cmds to send to the server
 	CommandList* recv_cmd_list_; // Cmds to send to the server
 
-	friend class GameMenus;
+
+	// Used to access private members of this class without constantly using a get method
 	friend class TextureLoader;
-	friend class Tilemap;
 	friend class GameObject;
+	friend class GameMenus;
+	friend class Tilemap;
 	friend class Sprite;
 	friend class Label;
+	friend class Agent;
+	friend class Path;
+	friend class Box;
 
 };
 

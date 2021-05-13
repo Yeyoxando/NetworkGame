@@ -42,8 +42,6 @@ public:
   //void loadMap(const int map[950]);
   void draw();
 
-  bool draw_grid_;
-
 protected:
   int static_map_[950];
   int dinamyc_map_[950];

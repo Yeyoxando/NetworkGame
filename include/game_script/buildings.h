@@ -14,12 +14,21 @@
 #include "game_object.h"
 
 // ------------------------------------------------------------------------- //
+
 class Building;
+enum BuildKind {
+	kBuildKind_DefenseTower = 0,
+	kBuildKind_House = 1,
+	kBuildKind_WoodHouse = 2,
+	kBuildKind_Farm = 3
+};
 
 class BuildManager {
 public:
 	BuildManager();
 	~BuildManager();
+
+	void selectBuilding(BuildKind build_kind);
 
 	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind);
 
@@ -35,13 +44,6 @@ class Building {
 public:
 	Building();
 	virtual ~Building();
-
-	enum BuildKind {
-		kBuildKind_DefenseTower = 0,
-		kBuildKind_House = 1,
-		kBuildKind_WoodHouse = 2,
-		kBuildKind_Farm = 3
-	};
 
 	int pos_x_;
 	int pos_y_;

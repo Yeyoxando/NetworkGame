@@ -10,7 +10,7 @@
 // ------------------------------------------------------------------------- //
 
 #include "imgui.h"
-#include <sdl_events.h>
+#include <SDL.h>
 
 // ------------------------------------------------------------------------- //
 
@@ -27,20 +27,26 @@ public:
 
 	void shutdownGUI();
 
-private:
-	void createBasicMenu();
-	void createBuildingMenu();
-	void createUnitsMenu();
 
-	// void createMainMenu()
-	// void createWinMenu()
-	// void createLoseMenu()
-	// void createDisconnectMenu()
-	// void createWaitingForConnectionMenu()
-	// void create...Menu()
+	bool debug_mode_;
+	bool build_mode_;
+
+private:
+	void drawBasicMenu();
+	void drawBuildingMenu();
+	void drawUnitsMenu();
+
+	// void drawMainMenu()
+	// void drawWinMenu()
+	// void drawLoseMenu()
+	// void drawDisconnectMenu()
+	// void drawWaitingForConnectionMenu()
+	// void draw...Menu()
 
 
 	ImGuiWindowFlags window_flags_;
+
+	SDL_Texture* tower_texture_;
 
 };
 

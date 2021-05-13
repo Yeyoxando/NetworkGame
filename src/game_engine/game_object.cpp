@@ -191,7 +191,7 @@ char* GameObject::get_name() {
 //---------------------------------------------------------------------------//
 
 //-------------------------------- Update -----------------------------------//
-void GameObject::update() {
+void GameObject::update(uint32_t time_step) {
   if (active_) {
     for (int i = 0; i < components_count_; ++i) {
       components_[i]->update();

@@ -79,9 +79,9 @@ void Scene::input() {
 
 }
 
-void Scene::update() {
+void Scene::update(uint32_t time_step) {
 	for (int i = 0; i < game_objects_.size(); ++i) {
-    game_objects_[i]->update();
+    game_objects_[i]->update(time_step);
   }
 
   //Test: working on collision with tags

@@ -83,8 +83,6 @@ void NetworkGame::loadGame() {
 	//Scene* scene = scene_;
 	build_manager_ = new BuildManager();
 
-	build_mode_ = false;
-
 	mouse_build_object_ = GameObject::CreateGameObject();
 	Sprite* sprite;
 	if (client_id_ == 2) {
@@ -116,9 +114,8 @@ void NetworkGame::input() {
 		/* Check the SDLKey values and move change the coords */
 		switch (events_.key.keysym.sym) {
 		case SDLK_b: {
-			build_mode_ = !build_mode_;
-			scene_->map_->draw_grid_ = !scene_->map_->draw_grid_;
-			if (build_mode_) {
+			game_menus_->build_mode_ = !game_menus_->build_mode_;
+			if (game_menus_->build_mode_) {
 				mouse_build_object_->active_ = true;
 			}
 			else {
@@ -134,7 +131,7 @@ void NetworkGame::input() {
 	}
 	case SDL_MOUSEBUTTONDOWN: {
 		if (events_.button.button == SDL_BUTTON_LEFT) {
-			if (build_mode_) {
+			if (game_menus_->build_mode_) {
 				build_manager_->createBuilding(true, transformed_mouse_x_, transformed_mouse_y_,
 					client_id_, 0);
 			}
@@ -154,11 +151,11 @@ void NetworkGame::input() {
 
 // ------------------------------------------------------------------------- //
 
-void NetworkGame::update() {
+void NetworkGame::update(uint32_t time_step) {
 
 	game_menus_->manageGUI();
 
-	if (build_mode_) {
+	if (game_menus_->build_mode_) {
 		// Fix position with map tiling
 		transformed_mouse_x_ = mouse_pos_x_ - (mouse_pos_x_ % 16) + 8.0f;
 		transformed_mouse_y_ = mouse_pos_y_ - (mouse_pos_y_ % 16);
@@ -175,7 +172,7 @@ void NetworkGame::update() {
 		recv_cmd_list_->commands_.erase(recv_cmd_list_->commands_.cbegin());
 	}
 
-	NetworkGame::instance().scene_->update();
+	NetworkGame::instance().scene_->update(time_step);
 	
 }
 

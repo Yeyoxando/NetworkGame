@@ -47,11 +47,21 @@ void GameMenus::initGUI() {
 	window_flags_ |= ImGuiWindowFlags_NoCollapse;
 
 
+	//Load resources
+	int width, height;
+	tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_tower.png", &width, &height);
+	//SDL_Renderer* renderer = NetworkGame::instance().renderer_;
+	//tower_texture_ = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, 100, 100);
+	//{
+	//	SDL_SetRenderTarget(renderer, tower_texture_);
+	//	SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+	//	SDL_RenderClear(renderer);
+	//	SDL_SetRenderTarget(renderer, nullptr);
+	//}
 
-	// Create menus
-	createBasicMenu();
-	createBuildingMenu();
-	createUnitsMenu();
+
+	debug_mode_ = false;
+	build_mode_ = false;
 
 }
 
@@ -113,17 +123,23 @@ void GameMenus::manageGUI() {
 
 	ImGui::NewFrame();
 
-	//Things to draw
-	//ImGui::ShowDemoWindow();
-	//...
-	//...
-
 	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y + 400), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ImVec2(608, 200), ImGuiCond_Always);
 
 	static bool p_open = true;
 	ImGui::Begin("Menu", &p_open, window_flags_);
+
+
+
+	if (build_mode_) {
+		drawBuildingMenu();
+	}
+	else {
+		drawBasicMenu();
+	}
+
+
 
 	ImGui::End();
 
@@ -149,23 +165,38 @@ void GameMenus::shutdownGUI() {
 
 // ------------------------------------------------------------------------- //
 
-void GameMenus::createBasicMenu() {
+void GameMenus::drawBasicMenu() {
 
+	if (ImGui::Button("Buildings", ImVec2(80, 30))) {
+		build_mode_ = true;
+		NetworkGame::instance().mouse_build_object_->active_ = true;
+	}
+	if (ImGui::Button("Units", ImVec2(80, 30))) {
 
-
-}
-
-// ------------------------------------------------------------------------- //
-
-void GameMenus::createBuildingMenu() {
-
-
+	}
 
 }
 
 // ------------------------------------------------------------------------- //
 
-void GameMenus::createUnitsMenu() {
+void GameMenus::drawBuildingMenu() {
+
+	if (ImGui::ImageButton(tower_texture_, ImVec2(100, 100))) {
+
+	}
+	ImGui::Text("Defense Tower");
+
+	ImGui::SetCursorPosY(170);
+	if (ImGui::Button("Back", ImVec2(40, 25))) {
+		build_mode_ = false;
+		NetworkGame::instance().mouse_build_object_->active_ = false;
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void GameMenus::drawUnitsMenu() {
 
 
 

@@ -54,7 +54,7 @@ public:
   void finish();
 
   void input();
-  void update();
+  void update(uint32_t time_step);
   void draw();
 
   //------------------------------ Attributes ---------------------------------//

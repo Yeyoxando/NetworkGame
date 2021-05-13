@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
 
 
     game->input();
-    game->update();
+    game->update(frame_delay);
 		ResumeThread(hThread);
     game->draw();
     
