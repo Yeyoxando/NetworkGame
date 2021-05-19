@@ -162,7 +162,7 @@ void NetworkGame::update(uint32_t time_step) {
 	// Execute other player received commands
 	while (recv_cmd_list_->commands_.cbegin() != recv_cmd_list_->commands_.cend()) {
 		BuildData* build_data = static_cast<BuildData*>(recv_cmd_list_->commands_[0]);
-		build_manager_->createBuilding(false, build_data->x, build_data->y, build_data->sender_id, build_data->kind_);
+		build_manager_->createBuilding(false, build_data->x, build_data->y, build_data->sender_id, build_data->build_kind);
 
 		recv_cmd_list_->commands_.erase(recv_cmd_list_->commands_.cbegin());
 	}

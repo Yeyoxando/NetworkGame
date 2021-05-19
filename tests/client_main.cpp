@@ -85,6 +85,7 @@ static DWORD socket_thread(void* game_data) {
 			data.build.kind_ = (int)build_data->kind_; // Tower
 			data.build.x = build_data->x;
 			data.build.y = build_data->y;
+			data.build.build_kind = build_data->build_kind;
 
 			send(sock, (char*)&data, sizeof(DataPackage), 0);
 
@@ -112,7 +113,7 @@ static DWORD socket_thread(void* game_data) {
 		while (receiving_cmd_count > 0) {
 			result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
 			if (result > 0) { // Something received
-				BuildData* build_data = CreateBuildData(data.build.sender_id, glm::vec2(data.build.x, data.build.y));
+				BuildData* build_data = CreateBuildData(data.build.sender_id, glm::vec2(data.build.x, data.build.y), data.build.build_kind);
 				game->recv_cmd_list_->commands_.push_back(build_data);
 			}
 			else if (result == 0) {
@@ -129,28 +130,6 @@ static DWORD socket_thread(void* game_data) {
 
 		SuspendThread(hThread);
 
-		// OLD
-		//Send user current transform to server
-		/*data.transform = client.id == 1 ? game->p1 : game->p2;
-		send(sock, (char*)&data, sizeof(DataPackage), 0);
-
-    // Receive data from the other user
-		result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
-		if (result > 0) {
-			if (client.id == 1) {
-				game->p2 = data.transform;
-			}
-			else {
-				game->p1 = data.transform;
-			}
-		}
-		else if(result == 0){
-			printf("\n Lost connection. Game finished.");
-			lockMutex();
-			connection_running = false;
-			unlockMutex();
-			break;
-		}*/
   }
 
 	// Send disconnection message

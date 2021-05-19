@@ -89,7 +89,7 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
 			build_object->addComponent(sprite);
 
-			if (selected_build_ == kBuildKind_DefenseTower) {
+			if (build_kind == kBuildKind_DefenseTower) {
 				build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
 			}
 			else {
@@ -98,7 +98,7 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 
 			if (send_command) {
 				// Add command to the cmd list for when the net thread starts working again
-				BuildData* build_cmd = CreateBuildData(player_id, glm::vec2(pos_x, pos_y));
+				BuildData* build_cmd = CreateBuildData(player_id, glm::vec2(pos_x, pos_y), build_kind);
 				NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
 			}
 		}
@@ -110,17 +110,16 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
 			build_object->addComponent(sprite);
 
-			if (selected_build_ == kBuildKind_DefenseTower) {
+			if (build_kind == kBuildKind_DefenseTower) {
 				build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
 			}
 			else {
 				build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
 			}
 
-
 			if (send_command) {
 				// Add command to the cmd list for when the net thread starts working again
-				BuildData* build_cmd = CreateBuildData(player_id, glm::vec2(pos_x, pos_y));
+				BuildData* build_cmd = CreateBuildData(player_id, glm::vec2(pos_x, pos_y), build_kind);
 				NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
 			}
 		}
@@ -177,26 +176,6 @@ Sprite* BuildManager::getBuildingSprite(GameObject& go, BuildKind build_kind, in
 	}
 
 	return sprite;
-
-}
-
-// ------------------------------------------------------------------------- //
-
-// ------------------------------------------------------------------------- //
-
-// ------------------------------------------------------------------------- //
-
-Building::Building(){
-
-
-
-}
-
-// ------------------------------------------------------------------------- //
-
-Building::~Building(){
-
-
 
 }
 

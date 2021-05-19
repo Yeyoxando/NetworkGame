@@ -118,40 +118,6 @@ static DWORD client_thread(void* client_socket) {
 			data_packages.erase(data_packages.cbegin());
 		}
 
-    // OLD
-		//Receive transform from player
-		/*result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
-		if (result > 0) {
-			//printf("\n Data received player %d: Transform. X: %d. Y: %d", count, data.transform.x, data.transform.y);
-      lockMutex();
-      transforms[count - 1] = data.transform;
-      unlockMutex();
-		}
-		else if (result == 0) {
-      lockMutex();
-      count = --connected_clients;
-      player_disconnected = true;
-      unlockMutex();
-
-			printf("\n A player has disconnected from the game.");
-			break;
-		}
-		else {
-			printf("\n Player %d data receive failed.", count);
-		}
-
-
-		//Send transform to other players
-		data.package_kind = kDataPackageKind_Transform;
-		//Player 2 position to player 1 client and vice versa
-    int other_player = count == 1 ? 1 : 0;
-
-    lockMutex();
-		data.transform = transforms[other_player];
-    unlockMutex();
-
-    send(sock, (char*)&data, sizeof(DataPackage), 0);
-    */
 	}
 
 	int opponent_socket = count == 1 ? 1 : 0;

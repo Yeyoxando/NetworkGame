@@ -37,9 +37,7 @@ struct Command {
 struct BuildData : public Command {
 	int x;
 	int y;
-	//build_kind
-	//hit_points
-	//etc
+	int build_kind;
 };
 
 /*
@@ -48,11 +46,6 @@ UnitData : public Command{
 	position, 
 	life
 	whatever needed to send 
-}
-
-ServerUpdate{
-	When the game ticks it'll send one of these
-	It will make the players' buildings tick and consume/produce resources
 }
 
 */
@@ -98,12 +91,14 @@ struct DataPackage {
 
 // Commands creation to add them to the cmd list and send them when the net thread gets active.
 
-static BuildData* CreateBuildData(int client_id, glm::vec2 position) {
+static BuildData* CreateBuildData(int client_id, glm::vec2 position, int build_kind) {
 	BuildData* data = new BuildData();
 	data->kind_ = (int)DataPackageKind::kDataPackageKind_Build;
 	data->sender_id = client_id;
 	data->x = position.x;
 	data->y = position.y;
+	data->build_kind = build_kind;
+
 	return data;
 }
 
