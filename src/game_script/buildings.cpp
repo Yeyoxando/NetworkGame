@@ -21,6 +21,27 @@ BuildManager::BuildManager(){
 	p1_buildings = std::vector<Building*>(0);
 	p2_buildings = std::vector<Building*>(0);
 
+
+	mouse_build_object_ = GameObject::CreateGameObject();
+
+	if (NetworkGame::instance().client_id_ == 2) {
+		build_sprites_[0] = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 80, 48, 16, 32);
+		build_sprites_[1] = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 64, 0, 16, 16);
+		build_sprites_[2] = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 96, 0, 16, 16);
+		build_sprites_[3] = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 80, 16, 16, 16);
+	}
+	else {
+		build_sprites_[0] = new Sprite(*mouse_build_object_, "../../../data/images/terrain.png", 192, 352, 32, 32);
+		build_sprites_[1] = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 48, 0, 16, 16);
+		build_sprites_[2] = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 112, 0, 16, 16);
+		build_sprites_[3] = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 80, 0, 16, 16);
+	}
+	mouse_build_object_->transform_.position_ = glm::vec3(-20.0f, -20.0f, 0);
+	mouse_build_object_->addComponent(build_sprites_[0]);
+	mouse_build_object_->active_ = false;
+
+	selected_build_ = kBuildKind_DefenseTower;
+
 }
 
 // ------------------------------------------------------------------------- //
@@ -34,6 +55,23 @@ BuildManager::~BuildManager(){
 	while (p2_buildings.size() > 0) {
 		p2_buildings.erase(p2_buildings.cbegin());
 	}
+	/*
+	for (int i = 0; i < 4; ++i) {
+		delete build_sprites_[i];
+	}
+	*/
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void BuildManager::selectBuilding(BuildKind build_kind){
+
+	mouse_build_object_->removeComponent(ComponentKind::kComponentKind_Sprite);
+
+	mouse_build_object_->addComponent(build_sprites_[(int)build_kind]);
+
+	selected_build_ = build_kind;
 
 }
 
@@ -48,17 +86,15 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 		if (tile_value == p2_build_tiles[0]) {
 
 			GameObject* build_object = GameObject::CreateGameObject();
-			Sprite* sprite2 = new Sprite(*build_object, "../../../data/images/objects.png", 80, 48, 16, 32);
-			build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
-			build_object->addComponent(sprite2);
-			
-			/*Building* new_build = new Building();
-			new_build->go_ref_ = build_object;
-			new_build->build_kind_ = (Building::BuildKind)build_kind;
-			new_build->pos_x_ = pos_x;
-			new_build->pos_y_ = pos_y;
-			p2_buildings.push_back(new_build);*/
+			Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
+			build_object->addComponent(sprite);
 
+			if (selected_build_ == kBuildKind_DefenseTower) {
+				build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
+			}
+			else {
+				build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
+			}
 
 			if (send_command) {
 				// Add command to the cmd list for when the net thread starts working again
@@ -71,16 +107,15 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 		if (tile_value == p1_build_tiles[0]) {
 			// Create the object in the position of the mouse if it is allowed
 			GameObject* build_object = GameObject::CreateGameObject();
-			Sprite* sprite = new Sprite(*build_object, "../../../data/images/terrain.png", 192, 352, 32, 32);
-			build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
+			Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
 			build_object->addComponent(sprite);
 
-			/*Building* new_build = new Building();
-			new_build->go_ref_ = build_object;
-			new_build->build_kind_ = (Building::BuildKind)build_kind;
-			new_build->pos_x_ = pos_x;
-			new_build->pos_y_ = pos_y;
-			p2_buildings.push_back(new_build);*/
+			if (selected_build_ == kBuildKind_DefenseTower) {
+				build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
+			}
+			else {
+				build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
+			}
 
 
 			if (send_command) {
@@ -90,6 +125,58 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			}
 		}
 	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Sprite* BuildManager::getBuildingSprite(GameObject& go, BuildKind build_kind, int player_id){
+
+	Sprite* sprite = nullptr;
+
+	switch (build_kind) {
+	case kBuildKind_DefenseTower: {
+		if (player_id == 2) {
+			sprite = new Sprite(go, "../../../data/images/objects.png", 80, 48, 16, 32);
+		}
+		else {
+			sprite = new Sprite(go, "../../../data/images/terrain.png", 192, 352, 32, 32);
+		}
+		break;
+	}
+	case kBuildKind_House: {
+		if (player_id == 2) {
+			sprite = new Sprite(go, "../../../data/images/objects.png", 64, 0, 16, 16);
+		}
+		else {
+			sprite = new Sprite(go, "../../../data/images/objects.png", 48, 0, 16, 16);
+		}
+		break;
+	}
+	case kBuildKind_Farm: {
+		if (player_id == 2) {
+			sprite = new Sprite(go, "../../../data/images/objects.png", 96, 0, 16, 16);
+		}
+		else {
+			sprite = new Sprite(go, "../../../data/images/objects.png", 112, 0, 16, 16);
+		}
+		break;
+	}
+	case kBuildKind_WoodHouse: {
+		if (player_id == 2) {
+			sprite = new Sprite(go, "../../../data/images/objects.png", 80, 16, 16, 16);
+		}
+		else {
+			sprite = new Sprite(go, "../../../data/images/objects.png", 80, 0, 16, 16);
+		}
+		break;
+	}
+	default: {
+		break;
+	}
+	}
+
+	return sprite;
 
 }
 

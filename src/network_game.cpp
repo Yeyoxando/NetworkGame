@@ -83,18 +83,6 @@ void NetworkGame::loadGame() {
 	//Scene* scene = scene_;
 	build_manager_ = new BuildManager();
 
-	mouse_build_object_ = GameObject::CreateGameObject();
-	Sprite* sprite;
-	if (client_id_ == 2) {
-		sprite = new Sprite(*mouse_build_object_, "../../../data/images/objects.png", 80, 48, 16, 32);
-	}
-	else {
-		sprite = new Sprite(*mouse_build_object_, "../../../data/images/terrain.png", 192, 352, 32, 32);
-	}
-	mouse_build_object_->transform_.position_ = glm::vec3(-20.0f, -20.0f, 0);
-	mouse_build_object_->addComponent(sprite);
-	mouse_build_object_->active_ = false;
-
 	game_menus_ = new GameMenus();
 	game_menus_->initGUI();
 
@@ -105,6 +93,9 @@ void NetworkGame::loadGame() {
 void NetworkGame::input() {
 
 	SDL_PollEvent(&events_);
+
+	SDL_GetMouseState(&mouse_pos_x_, &mouse_pos_y_);
+
 	switch (events_.type) {
 	case SDL_QUIT: {
 		window_should_close_ = true;
@@ -116,10 +107,10 @@ void NetworkGame::input() {
 		case SDLK_b: {
 			game_menus_->build_mode_ = !game_menus_->build_mode_;
 			if (game_menus_->build_mode_) {
-				mouse_build_object_->active_ = true;
+				build_manager_->mouse_build_object_->active_ = true;
 			}
 			else {
-				mouse_build_object_->active_ = false;
+				build_manager_->mouse_build_object_->active_ = false;
 			}
 			break;
 		}
@@ -131,9 +122,9 @@ void NetworkGame::input() {
 	}
 	case SDL_MOUSEBUTTONDOWN: {
 		if (events_.button.button == SDL_BUTTON_LEFT) {
-			if (game_menus_->build_mode_) {
+			if (game_menus_->build_mode_ && mouse_pos_y_ <= 400) {
 				build_manager_->createBuilding(true, transformed_mouse_x_, transformed_mouse_y_,
-					client_id_, 0);
+					client_id_, (int)build_manager_->selected_build_);
 			}
 		}
 		break;
@@ -142,8 +133,6 @@ void NetworkGame::input() {
 		break;
 	}
 	}
-
-	SDL_GetMouseState(&mouse_pos_x_, &mouse_pos_y_);
 
 	game_menus_->inputGUI(events_);
 
@@ -160,8 +149,14 @@ void NetworkGame::update(uint32_t time_step) {
 		transformed_mouse_x_ = mouse_pos_x_ - (mouse_pos_x_ % 16) + 8.0f;
 		transformed_mouse_y_ = mouse_pos_y_ - (mouse_pos_y_ % 16);
 
-		mouse_build_object_->transform_.position_ = glm::vec3(transformed_mouse_x_,
-			transformed_mouse_y_, 0.0f);
+		if (build_manager_->selected_build_ == kBuildKind_DefenseTower){
+			build_manager_->mouse_build_object_->transform_.position_ = glm::vec3(transformed_mouse_x_,
+				transformed_mouse_y_, 0.0f);
+		} 
+		else{
+			build_manager_->mouse_build_object_->transform_.position_ = glm::vec3(transformed_mouse_x_,
+				transformed_mouse_y_ + 8.0f, 0.0f);
+		}
 	}
 
 	// Execute other player received commands

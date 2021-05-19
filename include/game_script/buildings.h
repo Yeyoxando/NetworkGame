@@ -19,8 +19,8 @@ class Building;
 enum BuildKind {
 	kBuildKind_DefenseTower = 0,
 	kBuildKind_House = 1,
-	kBuildKind_WoodHouse = 2,
-	kBuildKind_Farm = 3
+	kBuildKind_Farm = 2,
+	kBuildKind_WoodHouse = 3,
 };
 
 class BuildManager {
@@ -32,9 +32,15 @@ public:
 
 	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind);
 
+	Sprite* getBuildingSprite(GameObject& go, BuildKind build_kind, int player_id);
+
 	std::vector<Building*> p1_buildings;
 	std::vector<Building*> p2_buildings;
+
+	GameObject* mouse_build_object_;
+	BuildKind selected_build_;
 protected:
+	Sprite* build_sprites_[4];
 
 };
 

@@ -63,7 +63,6 @@ private:
 
 	//Game specific
 	GameMenus* game_menus_;
-	GameObject* mouse_build_object_;
 	BuildManager* build_manager_;
 
 public:

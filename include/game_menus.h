@@ -47,6 +47,9 @@ private:
 	ImGuiWindowFlags window_flags_;
 
 	SDL_Texture* tower_texture_;
+	SDL_Texture* house_texture_;
+	SDL_Texture* farm_texture_;
+	SDL_Texture* woodhouse_texture_;
 
 };
 

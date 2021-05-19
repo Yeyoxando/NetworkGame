@@ -49,15 +49,25 @@ void GameMenus::initGUI() {
 
 	//Load resources
 	int width, height;
-	tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_tower.png", &width, &height);
-	//SDL_Renderer* renderer = NetworkGame::instance().renderer_;
-	//tower_texture_ = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, 100, 100);
-	//{
-	//	SDL_SetRenderTarget(renderer, tower_texture_);
-	//	SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-	//	SDL_RenderClear(renderer);
-	//	SDL_SetRenderTarget(renderer, nullptr);
-	//}
+	if (NetworkGame::instance().client_id_ == 2) {
+		tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_tower.png", &width, &height);
+	
+		house_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_house.png", &width, &height);
+
+		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_farm.png", &width, &height);
+
+		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_wood.png", &width, &height);
+	}
+	else {
+		tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_tower.png", &width, &height);
+	
+		house_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_house.png", &width, &height);
+
+		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_farm.png", &width, &height);
+
+		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_wood.png", &width, &height);
+	}
+
 
 
 	debug_mode_ = false;
@@ -169,7 +179,7 @@ void GameMenus::drawBasicMenu() {
 
 	if (ImGui::Button("Buildings", ImVec2(80, 30))) {
 		build_mode_ = true;
-		NetworkGame::instance().mouse_build_object_->active_ = true;
+		NetworkGame::instance().build_manager_->mouse_build_object_->active_ = true;
 	}
 	if (ImGui::Button("Units", ImVec2(80, 30))) {
 
@@ -182,14 +192,35 @@ void GameMenus::drawBasicMenu() {
 void GameMenus::drawBuildingMenu() {
 
 	if (ImGui::ImageButton(tower_texture_, ImVec2(100, 100))) {
-
+		NetworkGame::instance().build_manager_->selectBuilding(kBuildKind_DefenseTower);
 	}
 	ImGui::Text("Defense Tower");
+
+	ImGui::SetCursorPos(ImVec2(120, 27));
+	if (ImGui::ImageButton(house_texture_, ImVec2(100, 100))) {
+		NetworkGame::instance().build_manager_->selectBuilding(kBuildKind_House);
+	}
+	ImGui::SetCursorPos(ImVec2(120, 137));
+	ImGui::Text("House");
+
+	ImGui::SetCursorPos(ImVec2(232, 27));
+	if (ImGui::ImageButton(farm_texture_, ImVec2(100, 100))) {
+		NetworkGame::instance().build_manager_->selectBuilding(kBuildKind_Farm);
+	}
+	ImGui::SetCursorPos(ImVec2(232, 137));
+	ImGui::Text("Farm");
+
+	ImGui::SetCursorPos(ImVec2(344, 27));
+	if (ImGui::ImageButton(woodhouse_texture_, ImVec2(100, 100))) {
+		NetworkGame::instance().build_manager_->selectBuilding(kBuildKind_WoodHouse);
+	}
+	ImGui::SetCursorPos(ImVec2(344, 137));
+	ImGui::Text("Wood house");
 
 	ImGui::SetCursorPosY(170);
 	if (ImGui::Button("Back", ImVec2(40, 25))) {
 		build_mode_ = false;
-		NetworkGame::instance().mouse_build_object_->active_ = false;
+		NetworkGame::instance().build_manager_->mouse_build_object_->active_ = false;
 	}
 
 }
