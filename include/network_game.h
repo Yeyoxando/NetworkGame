@@ -15,9 +15,10 @@
 #include "game_menus.h"
 
 #include "game_script/buildings.h"
+#include "game_script/units.h"
 
-#include <../deps/SDL2-2.0.14/include/SDL.h>
-#include <../deps/SDL2_image-2.0.5/include/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 // ------------------------------------------------------------------------- //
 
@@ -28,8 +29,6 @@ public:
 	static NetworkGame& instance();
 
 	void init();
-
-	void loadResources();
 	void loadGame();
 
 	void input();
@@ -64,6 +63,8 @@ private:
 	//Game specific
 	GameMenus* game_menus_;
 	BuildManager* build_manager_;
+	UnitManager* unit_manager_;
+
 
 public:
 	// Network specific

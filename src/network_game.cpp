@@ -58,7 +58,6 @@ void NetworkGame::init() {
 
 	tex_loader_ = new TextureLoader();
 
-
 	scene_ = new Scene();
 	scene_->init();
 
@@ -66,22 +65,12 @@ void NetworkGame::init() {
 
 // ------------------------------------------------------------------------- //
 
-void NetworkGame::loadResources() {
-
-	// Sprites, maps and everything
-	/*tex_loader_->loadTexture("../../../data/images/tileset.png");
-	tex_loader_->loadTexture("../../../data/images/terrain.png");
-	tex_loader_->loadTexture("../../../data/images/objects.png");*/
-
-}
-
-// ------------------------------------------------------------------------- //
-
 void NetworkGame::loadGame() {
 
-	// Create game objects and map.
-	//Scene* scene = scene_;
+	// Create game things
 	build_manager_ = new BuildManager();
+	unit_manager_ = new UnitManager();
+	unit_manager_->init();
 
 	game_menus_ = new GameMenus();
 	game_menus_->initGUI();
@@ -177,6 +166,7 @@ void NetworkGame::draw() {
 	
 	// Draw things
 	NetworkGame::instance().scene_->draw();
+	unit_manager_->drawPaths();
 
 	game_menus_->drawGUI();
 

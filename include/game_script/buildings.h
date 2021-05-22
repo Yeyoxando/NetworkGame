@@ -16,6 +16,7 @@
 // ------------------------------------------------------------------------- //
 
 class Building;
+
 enum BuildKind {
 	kBuildKind_DefenseTower = 0,
 	kBuildKind_House = 1,
@@ -32,6 +33,12 @@ public:
 
 	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind);
 
+	bool checkAndUseResourcesRequired(bool waste_resources);
+	void addResourcesEarned(int pos_x, int pos_y);
+
+	bool checkForBuilding(glm::vec2 build_pos);
+	bool checkForSurroundingBuildings(glm::vec2 build_pos);
+
 	Sprite* getBuildingSprite(GameObject& go, BuildKind build_kind, int player_id);
 
 	std::vector<Building*> p1_buildings;
@@ -39,8 +46,24 @@ public:
 
 	GameObject* mouse_build_object_;
 	BuildKind selected_build_;
+
+	int people_pieces_;
+	int food_pieces_;
+	int wood_pieces_;
+
 protected:
 	Sprite* build_sprites_[4];
+
+};
+
+// ------------------------------------------------------------------------- //
+
+class Building {
+public: 
+	Building();
+	~Building();
+
+protected:
 
 };
 

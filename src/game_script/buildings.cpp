@@ -42,6 +42,10 @@ BuildManager::BuildManager(){
 
 	selected_build_ = kBuildKind_DefenseTower;
 
+	people_pieces_ = 3;
+	food_pieces_ = 8;
+	wood_pieces_ = 5;
+
 }
 
 // ------------------------------------------------------------------------- //
@@ -79,51 +83,183 @@ void BuildManager::selectBuilding(BuildKind build_kind){
 
 void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind){
 
-	// Check if the current tile is buildable by this player
+	// Get current tile value for the mouse position
 	int tile_value = basic_map[(pos_x / 16) +	((pos_y / 16) * 38)];
 
-	if (player_id == 2) {
-		if (tile_value == p2_build_tiles[0]) {
+	glm::vec2 pos = glm::vec2(pos_x, pos_y);
 
-			GameObject* build_object = GameObject::CreateGameObject();
-			Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
-			build_object->addComponent(sprite);
-
+	if (player_id == 2) { // Player 2 Building
+		// Previous comprobations for placement
+		if (tile_value == p2_build_tiles[0] && !checkForBuilding(pos)) {
 			if (build_kind == kBuildKind_DefenseTower) {
-				build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
-			}
-			else {
-				build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
+				if (NetworkGame::instance().getScene()->map_->
+						checkFourAdjacentTiles(pos, Tilemap::kTileKind_RoadBuildable) == 0) return;
 			}
 
-			if (send_command) {
-				// Add command to the cmd list for when the net thread starts working again
-				BuildData* build_cmd = CreateBuildData(player_id, glm::vec2(pos_x, pos_y), build_kind);
-				NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
+			// If everything okay check for resources and waste them if possible
+			if (checkAndUseResourcesRequired(send_command)) {
+
+				GameObject* build_object = GameObject::CreateGameObject();
+				Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
+				build_object->addComponent(sprite);
+
+				if (build_kind == kBuildKind_DefenseTower) {
+					build_object->transform_.position_ = glm::vec3(pos, 0.0f);
+				}
+				else {
+					build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
+				}
+
+				/*Building* new_build = new Building();
+				new_build->go_ref_ = build_object;
+				new_build->build_kind_ = (Building::BuildKind)build_kind;
+				new_build->pos_x_ = pos_x;
+				new_build->pos_y_ = pos_y;
+				p2_buildings.push_back(new_build);*/
+
+				if (send_command) {
+					addResourcesEarned(pos_x, pos_y);
+					// Add command to the cmd list for when the net thread starts working again
+					BuildData* build_cmd = CreateBuildData(player_id, pos, build_kind);
+					NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
+				}
 			}
 		}
 	}
-	else {
-		if (tile_value == p1_build_tiles[0]) {
-			// Create the object in the position of the mouse if it is allowed
-			GameObject* build_object = GameObject::CreateGameObject();
-			Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
-			build_object->addComponent(sprite);
-
+	else { // Player 1 Building
+		// Previous comprobations for placement
+		if (tile_value == p1_build_tiles[0] && !checkForBuilding(pos)) {
 			if (build_kind == kBuildKind_DefenseTower) {
-				build_object->transform_.position_ = glm::vec3(pos_x, pos_y, 0.0f);
-			}
-			else {
-				build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
+				if (NetworkGame::instance().getScene()->map_->
+					checkFourAdjacentTiles(pos, Tilemap::kTileKind_RoadBuildable) == 0) return;
 			}
 
-			if (send_command) {
-				// Add command to the cmd list for when the net thread starts working again
-				BuildData* build_cmd = CreateBuildData(player_id, glm::vec2(pos_x, pos_y), build_kind);
-				NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
+			// If everything okay check for resources and waste them if possible
+			if (checkAndUseResourcesRequired(send_command)) {
+				GameObject* build_object = GameObject::CreateGameObject();
+				Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
+				build_object->addComponent(sprite);
+
+				if (build_kind == kBuildKind_DefenseTower) {
+					build_object->transform_.position_ = glm::vec3(pos, 0.0f);
+				}
+				else {
+					build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
+				}
+
+				/*Building* new_build = new Building();
+				new_build->go_ref_ = build_object;
+				new_build->build_kind_ = (Building::BuildKind)build_kind;
+				new_build->pos_x_ = pos_x;
+				new_build->pos_y_ = pos_y;
+				p1_buildings.push_back(new_build);*/
+
+				if (send_command) {
+					// Add command to the cmd list for when the net thread starts working again
+					addResourcesEarned(pos_x, pos_y);
+					BuildData* build_cmd = CreateBuildData(player_id, pos, build_kind);
+					NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
+				}
 			}
 		}
 	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+bool BuildManager::checkAndUseResourcesRequired(bool waste_resources){
+
+	if (!waste_resources) return true;
+
+	switch (selected_build_){
+	case kBuildKind_DefenseTower: {
+		if (people_pieces_ >= 2 && wood_pieces_ >= 2) {
+			people_pieces_ -= 2;
+			wood_pieces_ -= 2;
+			return true;
+		}
+		break;
+	}
+	case kBuildKind_House: {
+		if (food_pieces_ >= 3 && wood_pieces_ >= 2) {
+			food_pieces_ -= 3;
+			wood_pieces_ -= 2;
+			return true;
+		}
+		break;
+	}
+	case kBuildKind_Farm: {
+		if (people_pieces_ >= 2 && wood_pieces_ >= 4) {
+			people_pieces_ -= 2;
+			wood_pieces_ -= 4;
+			return true;
+		}
+		break;
+	}
+	case kBuildKind_WoodHouse: {
+		if (people_pieces_ >= 2 && wood_pieces_ >= 3) {
+			people_pieces_ -= 2;
+			wood_pieces_ -= 3;
+			return true;
+		}
+		break;
+	}
+	default: {
+		return false;
+		break;
+	}
+	}
+
+	return false;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void BuildManager::addResourcesEarned(int pos_x, int pos_y){
+
+	Tilemap* map = NetworkGame::instance().getScene()->map_;
+
+	switch (selected_build_) {
+	case kBuildKind_DefenseTower: {
+		
+		break;
+	}
+	case kBuildKind_House: {
+		people_pieces_ += 3;
+		break;
+	}
+	case kBuildKind_Farm: {
+		// surrounding grass tiles
+		food_pieces_ += map->checkEightAdjacentTiles(glm::vec2(pos_x, pos_y), Tilemap::kTileKind_FarmGrass);
+		break;
+	}
+	case kBuildKind_WoodHouse: {
+		// surrounding wood tiles
+		wood_pieces_ += map->checkEightAdjacentTiles(glm::vec2(pos_x, pos_y), Tilemap::kTileKind_Tree);
+		break;
+	}
+	default: {
+		break;
+	}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+bool BuildManager::checkForBuilding(glm::vec2 build_pos){
+
+	return false;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+bool BuildManager::checkForSurroundingBuildings(glm::vec2 build_pos){
+
+	return false;
 
 }
 
@@ -176,6 +312,22 @@ Sprite* BuildManager::getBuildingSprite(GameObject& go, BuildKind build_kind, in
 	}
 
 	return sprite;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Building::Building(){
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Building::~Building(){
+
+
 
 }
 

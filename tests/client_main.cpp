@@ -167,7 +167,6 @@ int main(int argc, char* argv[]) {
 	game->init();
 
 	// Init resources and game
-	game->loadResources();
 	game->loadGame();
 
   // Game loop

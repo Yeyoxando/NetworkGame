@@ -70,7 +70,7 @@ void GameMenus::initGUI() {
 
 
 
-	debug_mode_ = false;
+	debug_mode_ = true;
 	build_mode_ = false;
 
 }
@@ -141,7 +141,7 @@ void GameMenus::manageGUI() {
 	ImGui::Begin("Menu", &p_open, window_flags_);
 
 
-
+	// Selected menu
 	if (build_mode_) {
 		drawBuildingMenu();
 	}
@@ -149,6 +149,13 @@ void GameMenus::manageGUI() {
 		drawBasicMenu();
 	}
 
+	// Resources
+	ImGui::SetCursorPos(ImVec2(390, 180));
+	ImGui::Text("People: %d", NetworkGame::instance().build_manager_->people_pieces_);
+	ImGui::SetCursorPos(ImVec2(480, 180));
+	ImGui::Text("Food: %d", NetworkGame::instance().build_manager_->food_pieces_);
+	ImGui::SetCursorPos(ImVec2(550, 180));
+	ImGui::Text("Wood: %d", NetworkGame::instance().build_manager_->wood_pieces_);
 
 
 	ImGui::End();

@@ -133,7 +133,69 @@ void Tilemap::loadSubSprites(){
 
 int Tilemap::checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind){
 
-	return 0;
+	int x = (int)tile_pos.x / 16;
+	int y = (int)tile_pos.y / 16;
+
+	int total_tiles = 0;
+
+	switch (tile_kind) {
+	case kTileKind_RoadBuildable: { // Those adjacent to a road
+		for (int i = 0; i < 6; ++i) { // 6 = number of possible road tiles
+			if (basic_map[x + ((y - 1) * 38)] == road_tiles[i]) { // Top
+				total_tiles++;
+			}
+			if (basic_map[(x + 1) + (y * 38)] == road_tiles[i]) { // Right
+				total_tiles++;
+			}
+			if (basic_map[x + ((y + 1) * 38)] == road_tiles[i]) { // Bottom
+				total_tiles++;
+			}
+			if (basic_map[(x - 1) + (y * 38)] == road_tiles[i]) { // Left
+				total_tiles++;
+			}
+		}
+		break;
+	}
+	case kTileKind_Tree: {
+		if (basic_map[x + ((y - 1) * 38)] == tree_tiles[0]) { // Top
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + (y * 38)] == tree_tiles[0]) { // Right
+			total_tiles++;
+		}
+		if (basic_map[x + ((y + 1) * 38)] == tree_tiles[0]) { // Bottom
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + (y * 38)] == tree_tiles[0]) { // Left
+			total_tiles++;
+		}
+		break;
+	}
+	case kTileKind_FarmGrass: { // Normal ground
+		if (basic_map[x + ((y - 1) * 38)] == p1_build_tiles[0] ||
+			basic_map[x + ((y - 1) * 38)] == p2_build_tiles[0]) { // Top
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + (y * 38)] == p1_build_tiles[0] ||
+			basic_map[(x + 1) + (y * 38)] == p2_build_tiles[0]) { // Right
+			total_tiles++;
+		}
+		if (basic_map[x + ((y + 1) * 38)] == p1_build_tiles[0] ||
+			basic_map[x + ((y + 1) * 38)] == p2_build_tiles[0]) { // Bottom
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + (y * 38)] == p1_build_tiles[0] ||
+			basic_map[(x - 1) + (y * 38)] == p2_build_tiles[0]) { // Left
+			total_tiles++;
+		}
+		break;
+	}
+	default: {
+		break;
+	}
+	}
+
+	return total_tiles;
 
 }
 
@@ -141,7 +203,109 @@ int Tilemap::checkFourAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind){
 
 int Tilemap::checkEightAdjacentTiles(glm::vec2 tile_pos, TileKind tile_kind){
 
-	return 0;
+	int x = (int)tile_pos.x / 16;
+	int y = (int)tile_pos.y / 16;
+
+	int total_tiles = 0;
+
+	switch (tile_kind) {
+	case kTileKind_RoadBuildable: { // Those adjacent to a road
+		for (int i = 0; i < 6; ++i) { // 6 = number of possible road tiles
+			if (basic_map[x + ((y - 1) * 38)] == road_tiles[i]) { // Top
+				total_tiles++;
+			}
+			if (basic_map[(x + 1) + (y * 38)] == road_tiles[i]) { // Right
+				total_tiles++;
+			}
+			if (basic_map[x + ((y + 1) * 38)] == road_tiles[i]) { // Bottom
+				total_tiles++;
+			}
+			if (basic_map[(x - 1) + (y * 38)] == road_tiles[i]) { // Left
+				total_tiles++;
+			}
+			if (basic_map[(x + 1) + ((y - 1) * 38)] == road_tiles[i]) { // Top Right
+				total_tiles++;
+			}
+			if (basic_map[(x - 1) + ((y - 1) * 38)] == road_tiles[i]) { // Top Left
+				total_tiles++;
+			}
+			if (basic_map[(x + 1) + ((y + 1) * 38)] == road_tiles[i]) { // Bottom Right
+				total_tiles++;
+			}
+			if (basic_map[(x - 1) + ((y + 1) * 38)] == road_tiles[i]) { // Bottom Left
+				total_tiles++;
+			}
+		}
+		break;
+	}
+	case kTileKind_Tree: {
+		if (basic_map[x + ((y - 1) * 38)] == tree_tiles[0]) { // Top
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + (y * 38)] == tree_tiles[0]) { // Right
+			total_tiles++;
+		}
+		if (basic_map[x + ((y + 1) * 38)] == tree_tiles[0]) { // Bottom
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + (y * 38)] == tree_tiles[0]) { // Left
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + ((y - 1) * 38)] == tree_tiles[0]) { // Top Right
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + ((y - 1) * 38)] == tree_tiles[0]) { // Top Left
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + ((y + 1) * 38)] == tree_tiles[0]) { // Bottom Right
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + ((y + 1) * 38)] == tree_tiles[0]) { // Bottom Left
+			total_tiles++;
+		}
+		break;
+	}
+	case kTileKind_FarmGrass: {
+		if (basic_map[x + ((y - 1) * 38)] == p1_build_tiles[0] ||
+				basic_map[x + ((y - 1) * 38)] == p2_build_tiles[0]) { // Top
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + (y * 38)] == p1_build_tiles[0] ||
+				basic_map[(x + 1) + (y * 38)] == p2_build_tiles[0]) { // Right
+			total_tiles++;
+		}
+		if (basic_map[x + ((y + 1) * 38)] == p1_build_tiles[0] ||
+				basic_map[x + ((y + 1) * 38)] == p2_build_tiles[0]) { // Bottom
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + (y * 38)] == p1_build_tiles[0] ||
+				basic_map[(x - 1) + (y * 38)] == p2_build_tiles[0]) { // Left
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + ((y - 1) * 38)] == p1_build_tiles[0] ||
+				basic_map[(x + 1) + ((y - 1) * 38)] == p2_build_tiles[0]) { // Top Right
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + ((y - 1) * 38)] == p1_build_tiles[0] ||
+				basic_map[(x - 1) + ((y - 1) * 38)] == p2_build_tiles[0]) { // Top Left
+			total_tiles++;
+		}
+		if (basic_map[(x + 1) + ((y + 1) * 38)] == p1_build_tiles[0] ||
+				basic_map[(x + 1) + ((y + 1) * 38)] == p2_build_tiles[0]) { // Bottom Right
+			total_tiles++;
+		}
+		if (basic_map[(x - 1) + ((y + 1) * 38)] == p1_build_tiles[0] ||
+				basic_map[(x - 1) + ((y + 1) * 38)] == p2_build_tiles[0]) { // Bottom Left
+			total_tiles++;
+		}
+		break;
+	}
+	default: {
+		break;
+	}
+	}
+
+	return total_tiles;
 
 }
 

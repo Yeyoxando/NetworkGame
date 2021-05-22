@@ -189,8 +189,7 @@ void Path::calculateTransformedPoints(/*glm::mat3 view_matrix*/){
     transformed_points_[(i * 2) + 1] = transform.y;
   }*/
 
-  transformed_points_.clear();
-  transformed_points_.reserve(number_points_);
+  transformed_points_ = std::vector<SDL_Point>(number_points_);
 
   for (uint32_t i = 0; i < number_points_; ++i) {
     SDL_Point point = { points_[i].x, points_[i].y };
@@ -329,7 +328,9 @@ bool Path::reached_target(glm::vec2 target){
 
 void Path::drawDebug() {
 
-  SDL_SetRenderDrawColor(NetworkGame::instance().renderer_, 0, 0, 0, 255);
+  if (!NetworkGame::instance().game_menus_->debug_mode_) return;
+
+  SDL_SetRenderDrawColor(NetworkGame::instance().renderer_, 0, 255, 255, 255);
 
   SDL_RenderDrawLines(NetworkGame::instance().renderer_, transformed_points_.data(), number_points_);
   
