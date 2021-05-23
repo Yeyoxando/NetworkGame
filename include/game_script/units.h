@@ -30,6 +30,9 @@ protected:
 	Path* p1_path;
 	Path* p2_path;
 
+	Agent* agent_p1;
+	Agent* agent_p2;
+
 };
 
 // ------------------------------------------------------------------------- //

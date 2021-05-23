@@ -510,11 +510,17 @@ void Agent::MOV_Deterministic(uint32_t time_step) {
 
   if (glm::distance(pos, target_) < kDistanceToReach) {
     is_aproacching_target_ = false;
+
+    target_ = current_path_->next_target();
     
     // Check if has finished its path
     reached_target_ = current_path_->reached_target(target_);
-
-    target_ = current_path_->next_target();
+    if (reached_target_) {
+      reached_target_ = false;
+      transform_.position_ = glm::vec3(current_path_->first_point(), 0);
+      target_ = current_path_->at_point(1);
+      active_ = false;
+    }
 
   }
 
@@ -898,15 +904,17 @@ void Agent::move(uint32_t time_step){
   if (is_aproacching_target_) {
     float decceleration = max_acceleration_ * (1.0f - brake_force_);
     acceleration_ += (0.95f * (decceleration - acceleration_)) * delta_time;
-    direction_.x += (0.95f * (desired_direction_.x - direction_.x)) * delta_time;
-    direction_.y += (0.95f * (desired_direction_.y - direction_.y)) * delta_time;
+    //direction_.x += (0.99f * (desired_direction_.x - direction_.x)) * delta_time;
+    //direction_.y += (0.99f * (desired_direction_.y - direction_.y)) * delta_time;
+    direction_ = desired_direction_;
   }
 
   // Increase speed going to next target
   if (!reached_target_ && !is_aproacching_target_) {
-    acceleration_ += (0.8f * (max_acceleration_ - acceleration_)) * delta_time;
-    direction_.x += (0.85f * (desired_direction_.x - direction_.x)) * delta_time;
-    direction_.y += (0.85f * (desired_direction_.y - direction_.y)) * delta_time;
+    acceleration_ += (0.85f * (max_acceleration_ - acceleration_)) * delta_time;
+    //direction_.x += (0.99f * (desired_direction_.x - direction_.x)) * delta_time;
+    //direction_.y += (0.99f * (desired_direction_.y - direction_.y)) * delta_time;
+    direction_ = desired_direction_;
   }
 
   // Brake when target is reached
@@ -917,7 +925,7 @@ void Agent::move(uint32_t time_step){
 
   transform_.position_.x += acceleration_ * direction_.x * delta_time;
   transform_.position_.y += acceleration_ * direction_.y * delta_time;
-  transform_.rotation_ = glm::degrees(atan2(direction_.x, direction_.y));
+  //transform_.rotation_ = glm::degrees(atan2(direction_.x, direction_.y));
 
 }
 

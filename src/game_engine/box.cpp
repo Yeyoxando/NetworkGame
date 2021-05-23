@@ -18,8 +18,7 @@ Box::Box(){
   size_ = glm::vec2(0.0f, 0.0f);
   position_ = glm::vec2(0.0f, 0.0f);
 
-  world_points_.reserve(4);
-  transformed_points_.reserve(5);
+  world_points_ = std::vector<glm::vec2>(4);
 
 }
 
@@ -41,8 +40,7 @@ Box::Box(glm::vec2 size, glm::vec2 position) {
   size_ = size;
   position_ = position;
 
-	world_points_.reserve(4);
-	transformed_points_.reserve(5);
+	world_points_ = std::vector<glm::vec2>(4);
 
   updatePoints();
 
@@ -129,13 +127,15 @@ void Box::calculateTransformedPoints(/*glm::mat3 view_matrix*/){
   transformed_points_[9] = transformed_points_[1];*/
 
 
-	transformed_points_.clear();
-	transformed_points_.reserve(5);
+  transformed_points_ = std::vector<SDL_Point>(5);
 
-	for (uint32_t i = 0; i < 5; ++i) {
-		SDL_Point point = { world_points_[i].x, world_points_[i].y };
+  SDL_Point point;
+	for (uint32_t i = 0; i < 4; ++i) {
+		point = { (int)world_points_[i].x, (int)world_points_[i].y };
 		transformed_points_[i] = point;
 	}
+  point = { (int)world_points_[0].x, (int)world_points_[0].y };
+  transformed_points_[4] = point;
 
 }
 

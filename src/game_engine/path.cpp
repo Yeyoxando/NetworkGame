@@ -287,11 +287,12 @@ bool Path::reached_target(glm::vec2 target){
   switch (action_) {
   case Path::kAction_Straight:
     if (direction_ == Path::kDirection_Forward) {
-      if (is_first(target)) current_loops_++;
+      return is_first(target);
+     /* if (is_first(target)) current_loops_++;
 
-      if (current_loops_ > 1) {
+      if (current_loops_ > 0) {
         return true;
-      }
+      }*/
     }
     if (direction_ == Path::kDirection_Backward) {
       return is_first(target);

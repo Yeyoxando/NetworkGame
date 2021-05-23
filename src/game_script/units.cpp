@@ -8,6 +8,7 @@
 // ------------------------------------------------------------------------- //
 
 #include "units.h"
+#include "network_game.h"
 
 // ------------------------------------------------------------------------- //
 
@@ -49,7 +50,31 @@ void UnitManager::drawPaths(){
 
 void UnitManager::initUnits(){
 
+	agent_p1 = new Agent();
+	agent_p1->init(glm::vec3(88, 376, 0));
+	agent_p1->set_brake_force(1.0f);
+	agent_p1->set_agent_size(Agent::kAgentSize_Small);
+	agent_p1->set_movement_mode(Agent::kMovementMode_Deterministic);
+	agent_p1->set_deterministic_path(p1_path);
 
+	Sprite* p1_sprite = new Sprite(*agent_p1, "../../../data/images/units/p1_unit1.png");
+	agent_p1->addComponent(p1_sprite);
+
+
+	agent_p2 = new Agent();
+	agent_p2->init(glm::vec3(520, 24, 0));
+	agent_p2->set_brake_force(1.0f);
+	agent_p2->set_agent_size(Agent::kAgentSize_Small);
+	agent_p2->set_movement_mode(Agent::kMovementMode_Deterministic);
+	agent_p2->set_deterministic_path(p2_path);
+
+	Sprite* p2_sprite = new Sprite(*agent_p2, "../../../data/images/units/p2_unit1.png");
+	agent_p2->addComponent(p2_sprite);
+
+
+
+	NetworkGame::instance().getScene()->addGameObject(agent_p1);
+	NetworkGame::instance().getScene()->addGameObject(agent_p2);
 
 }
 
@@ -118,7 +143,9 @@ void UnitManager::initPaths(){
 	p1_path->addPoint(glm::vec2(552, 88));
 	p1_path->addPoint(glm::vec2(552, 72));
 	p1_path->addPoint(glm::vec2(552, 56));
-	p1_path->is_ready();
+	p1_path->set_ready();
+	p1_path->set_direction(Path::kDirection_Forward);
+	p1_path->set_action(Path::kAction_Straight);
 	p1_path->calculateTransformedPoints();
 
 	p2_path = new Path();
@@ -156,7 +183,7 @@ void UnitManager::initPaths(){
 	p2_path->addPoint(glm::vec2(120, 72));
 	p2_path->addPoint(glm::vec2(120, 88));
 	p2_path->addPoint(glm::vec2(104, 88));
-	p2_path->addPoint(glm::vec2(104, 104));
+	p2_path->addPoint(glm::vec2(88, 88));
 	p2_path->addPoint(glm::vec2(88, 104));
 	p2_path->addPoint(glm::vec2(88, 120));
 	p2_path->addPoint(glm::vec2(88, 136));
@@ -183,7 +210,9 @@ void UnitManager::initPaths(){
 	p2_path->addPoint(glm::vec2(56, 312));
 	p2_path->addPoint(glm::vec2(56, 328));
 	p2_path->addPoint(glm::vec2(56, 344));
-	p2_path->is_ready();
+	p2_path->set_ready();
+	p2_path->set_direction(Path::kDirection_Forward);
+	p2_path->set_action(Path::kAction_Straight);
 	p2_path->calculateTransformedPoints();
 
 }

@@ -27,11 +27,11 @@ class Agent : public GameObject {
 
   // --- General movement constants ---
   /// @brief: Generic speed for an agent 
-  const float kAgentDefaultSpeed = 5.0f;
+  const float kAgentDefaultSpeed = 20.0f;
   /// @brief: Distance to check if target is reached 
-  const float kDistanceToReach = 4.0f;
+  const float kDistanceToReach = 5.0f;
   /// @brief: Distance to check if target is near and should slow their speed
-  const float kDistanceToApproach = 50.0f;
+  const float kDistanceToApproach = 10.0f;
 
   // --- FSM movement constants
   /// @brief: Distance to start chasing for bigger agents
