@@ -34,7 +34,7 @@ public:
 	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind);
 
 	bool checkAndUseResourcesRequired(bool waste_resources);
-	void addResourcesEarned(int pos_x, int pos_y);
+	int addResourcesEarned(int pos_x, int pos_y);
 
 	bool checkForBuilding(glm::vec2 build_pos);
 	bool checkForSurroundingBuildings(glm::vec2 build_pos);
@@ -52,16 +52,104 @@ public:
 	int wood_pieces_;
 
 protected:
+	void createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind);
+
 	Sprite* build_sprites_[4];
 
 };
 
 // ------------------------------------------------------------------------- //
 
-class Building {
-public: 
-	Building();
+class Building : public GameObject {
+public:
 	~Building();
+
+	int client_owner_id_;
+	int build_id_;
+
+	virtual void update(uint32_t time_step) override { GameObject::update(time_step); }
+	virtual void draw() override { GameObject::draw(); }
+
+protected:
+	Building();
+	BuildKind build_kind_;
+
+};
+
+// ------------------------------------------------------------------------- //
+
+class Tower : public Building {
+public:
+	Tower();
+	~Tower();
+
+	const int kPeopleCost = 2;
+	const int kFoodCost = 0;
+	const int kWoodCost = 3;
+
+	virtual void update(uint32_t time_step) override; // each frame
+	virtual void draw() override; // each frame
+
+	int range_;
+
+protected:
+
+
+};
+
+// ------------------------------------------------------------------------- //
+
+class House : public Building {
+public:
+	House();
+	~House();
+
+	const int kPeopleCost = 0;
+	const int kFoodCost = 3;
+	const int kWoodCost = 2;
+
+	//virtual void update(uint32_t time_step) override; // each frame
+	//void update(); // Only when server send a tick
+
+protected:
+
+};
+
+// ------------------------------------------------------------------------- //
+
+class Farm : public Building {
+public:
+	Farm();
+	~Farm();
+
+	const int kPeopleCost = 2;
+	const int kFoodCost = 0;
+	const int kWoodCost = 4;
+
+	//virtual void update(uint32_t time_step) override; // each frame
+	void update(); // Only when server send a tick
+
+	int tick_resources_;
+
+protected:
+
+};
+
+// ------------------------------------------------------------------------- //
+
+class Woodhouse : public Building {
+public:
+	Woodhouse();
+	~Woodhouse();
+
+	const int kPeopleCost = 2;
+	const int kFoodCost = 0;
+	const int kWoodCost = 3;
+
+	//virtual void update(uint32_t time_step) override; // each frame
+	void update(); // Only when server send a tick
+
+	int tick_resources_;
 
 protected:
 

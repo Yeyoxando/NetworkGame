@@ -65,9 +65,9 @@ private:
 	bool game_started_;
 
 	//Game specific
-	GameMenus* game_menus_;
 	BuildManager* build_manager_;
 	UnitManager* unit_manager_;
+	GameMenus* game_menus_;
 
 
 public:
@@ -87,6 +87,8 @@ public:
 	friend class Agent;
 	friend class Path;
 	friend class Box;
+	friend class Farm;
+	friend class Woodhouse;
 
 };
 

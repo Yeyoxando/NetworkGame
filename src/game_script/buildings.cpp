@@ -99,23 +99,7 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			// If everything okay check for resources and waste them if possible
 			if (checkAndUseResourcesRequired(send_command)) {
 
-				GameObject* build_object = GameObject::CreateGameObject();
-				Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
-				build_object->addComponent(sprite);
-
-				if (build_kind == kBuildKind_DefenseTower) {
-					build_object->transform_.position_ = glm::vec3(pos, 0.0f);
-				}
-				else {
-					build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
-				}
-
-				/*Building* new_build = new Building();
-				new_build->go_ref_ = build_object;
-				new_build->build_kind_ = (Building::BuildKind)build_kind;
-				new_build->pos_x_ = pos_x;
-				new_build->pos_y_ = pos_y;
-				p2_buildings.push_back(new_build);*/
+				createBuildingGameObject(player_id, pos, build_kind);
 
 				if (send_command) {
 					addResourcesEarned(pos_x, pos_y);
@@ -136,23 +120,8 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 
 			// If everything okay check for resources and waste them if possible
 			if (checkAndUseResourcesRequired(send_command)) {
-				GameObject* build_object = GameObject::CreateGameObject();
-				Sprite* sprite = getBuildingSprite(*build_object, (BuildKind)build_kind, player_id);
-				build_object->addComponent(sprite);
-
-				if (build_kind == kBuildKind_DefenseTower) {
-					build_object->transform_.position_ = glm::vec3(pos, 0.0f);
-				}
-				else {
-					build_object->transform_.position_ = glm::vec3(pos_x, pos_y + 8.0f, 0.0f);
-				}
-
-				/*Building* new_build = new Building();
-				new_build->go_ref_ = build_object;
-				new_build->build_kind_ = (Building::BuildKind)build_kind;
-				new_build->pos_x_ = pos_x;
-				new_build->pos_y_ = pos_y;
-				p1_buildings.push_back(new_build);*/
+				
+				createBuildingGameObject(player_id, pos, build_kind);
 
 				if (send_command) {
 					// Add command to the cmd list for when the net thread starts working again
@@ -217,9 +186,10 @@ bool BuildManager::checkAndUseResourcesRequired(bool waste_resources){
 
 // ------------------------------------------------------------------------- //
 
-void BuildManager::addResourcesEarned(int pos_x, int pos_y){
+int BuildManager::addResourcesEarned(int pos_x, int pos_y){
 
 	Tilemap* map = NetworkGame::instance().getScene()->map_;
+	int resources_earned = 0;
 
 	switch (selected_build_) {
 	case kBuildKind_DefenseTower: {
@@ -227,23 +197,30 @@ void BuildManager::addResourcesEarned(int pos_x, int pos_y){
 		break;
 	}
 	case kBuildKind_House: {
-		people_pieces_ += 3;
+		resources_earned = 3;
+		people_pieces_ += resources_earned;
 		break;
 	}
 	case kBuildKind_Farm: {
 		// surrounding grass tiles
-		food_pieces_ += map->checkEightAdjacentTiles(glm::vec2(pos_x, pos_y), Tilemap::kTileKind_FarmGrass);
+		resources_earned = map->checkEightAdjacentTiles(glm::vec2(pos_x, pos_y), 
+			Tilemap::kTileKind_FarmGrass);
+		food_pieces_ += resources_earned;
 		break;
 	}
 	case kBuildKind_WoodHouse: {
 		// surrounding wood tiles
-		wood_pieces_ += map->checkEightAdjacentTiles(glm::vec2(pos_x, pos_y), Tilemap::kTileKind_Tree);
+		resources_earned = map->checkEightAdjacentTiles(glm::vec2(pos_x, pos_y), 
+			Tilemap::kTileKind_Tree);
+		wood_pieces_ += resources_earned;
 		break;
 	}
 	default: {
 		break;
 	}
 	}
+
+	return resources_earned;
 
 }
 
@@ -317,9 +294,63 @@ Sprite* BuildManager::getBuildingSprite(GameObject& go, BuildKind build_kind, in
 
 // ------------------------------------------------------------------------- //
 
+void BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind){
+
+	Building* building = nullptr;
+
+	switch (build_kind) {
+	case kBuildKind_DefenseTower: {
+		building = new Tower();
+		building->init(glm::vec3(pos, 0.0f));
+		
+		break;
+	}
+	case kBuildKind_House: {
+		building = new House();
+		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+
+		break;
+	}
+	case kBuildKind_Farm: {
+		building = new Farm();
+		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+
+		break;
+	}
+	case kBuildKind_WoodHouse: {
+		building = new Woodhouse();
+		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+
+		break;
+	}
+	default: {
+		break;
+	}
+	}
+
+	Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
+	building->addComponent(sprite);
+	building->client_owner_id_ = player_id;
+
+	if (player_id == 2) {
+		building->build_id_ = p2_buildings.size();
+		p2_buildings.push_back(building);
+	}
+	else {
+		building->build_id_ = p1_buildings.size();
+		p1_buildings.push_back(building);
+	}
+	
+	NetworkGame::instance().getScene()->addGameObject(building);
+
+}
+
+// ------------------------------------------------------------------------- //
+
 Building::Building(){
 
-
+	build_id_ = -1;
+	active_ = true;
 
 }
 
@@ -328,6 +359,111 @@ Building::Building(){
 Building::~Building(){
 
 
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Tower::Tower(){
+
+	build_kind_ = kBuildKind_DefenseTower;
+	range_ = 1;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Tower::~Tower(){
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Tower::update(uint32_t time_step){
+
+	GameObject::update(time_step);
+
+	// Attack enemy units if they are near
+	// enemy towers will attack in the enemy client, in this way the player units life 
+	// will be sent with the position and everything else
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Tower::draw(){
+
+	GameObject::draw();
+
+}
+
+// ------------------------------------------------------------------------- //
+
+House::House(){
+
+	build_kind_ = kBuildKind_House;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+House::~House(){
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Farm::Farm() {
+
+	build_kind_ = kBuildKind_Farm;
+	tick_resources_ = 0; // Set when built
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Farm::~Farm(){
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Farm::update() {
+
+	// Give player this farms resources when the server ticks
+	NetworkGame::instance().build_manager_->food_pieces_ += tick_resources_;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Woodhouse::Woodhouse() {
+
+	build_kind_ = kBuildKind_WoodHouse;
+	tick_resources_ = 0; // Set when built
+
+}
+
+// ------------------------------------------------------------------------- //
+
+Woodhouse::~Woodhouse(){
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Woodhouse::update() {
+
+	// Give player this woodhouse resources when the server ticks
+	NetworkGame::instance().build_manager_->wood_pieces_ += tick_resources_;
 
 }
 

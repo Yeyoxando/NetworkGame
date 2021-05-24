@@ -22,6 +22,9 @@ public:
 	UnitManager();
 	~UnitManager();
 
+	const int kUnitFoodCost = 2;
+
+
 	void init(int client_id);
 
 	void drawPaths();
