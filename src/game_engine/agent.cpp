@@ -41,6 +41,9 @@ Agent::Agent(){
   fsm_state_ = kFSMState_Working;
   is_transitioning_ = false;
 
+  client_owner_id_ = 0;
+  unit_id_ = 0;
+
 }
 
 // ------------------------------------------------------------------------- //
@@ -489,6 +492,9 @@ void Agent::MOV_Deterministic(uint32_t time_step) {
 
   if (current_path_ == nullptr) return;
 
+  if (client_owner_id_ != NetworkGame::instance().client_id_) return;
+  if (!NetworkGame::instance().game_started_ || !active_) return;
+
   // Init movement
   if (!started_movement_) {
     target_ = current_path_->next_target();
@@ -496,6 +502,11 @@ void Agent::MOV_Deterministic(uint32_t time_step) {
   }
 
   glm::vec2 pos = glm::vec2(transform_.position_.x, transform_.position_.y);
+
+	//Send command
+  UnitData* unit_data = CreateUnitData(client_owner_id_, pos, unit_id_, 10, active_);
+  NetworkGame::instance().unit_manager_->updateUnit(true, *unit_data);
+
   // Calculate movement
   if (!current_path_->is_ready()) {
     printf("\nError: agent deterministic path not set as ready");

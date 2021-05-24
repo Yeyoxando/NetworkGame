@@ -46,6 +46,8 @@ public:
 private:
 	NetworkGame();
 
+	void processNetCommands();
+
 	// Engine specific
 	SDL_Window* window_;
 	SDL_Renderer* renderer_;
@@ -59,6 +61,8 @@ private:
 	int mouse_pos_y_;
 	int transformed_mouse_x_;
 	int transformed_mouse_y_;
+
+	bool game_started_;
 
 	//Game specific
 	GameMenus* game_menus_;
@@ -74,6 +78,7 @@ public:
 
 	// Used to access private members of this class without constantly using a get method
 	friend class TextureLoader;
+	friend class UnitManager;
 	friend class GameObject;
 	friend class GameMenus;
 	friend class Tilemap;

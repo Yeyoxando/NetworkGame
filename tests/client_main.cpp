@@ -31,6 +31,7 @@ static DWORD socket_thread(void* game_data) {
   SOCKET sock;
 	sockaddr_in server_ip;
 	int ip_length = sizeof(server_ip);
+	int executed_times = 0;
 
 	DataPackage data;
 	Client client = { -1 };
@@ -74,22 +75,37 @@ static DWORD socket_thread(void* game_data) {
 		data.header.cmd_count_ = game->cmd_list_->commands_.size();
 		send(sock, (char*)&data, sizeof(DataPackage), 0);
 		if (data.header.cmd_count_ > 0) {
-			printf("\nSend");
+			printf("\nFrame %d: Sending %d cmds.", executed_times, data.header.cmd_count_);
 		}
-
+		
+		int send_cmd_count = data.header.cmd_count_;
 		// Send as many commands as have been accumulated in the cmd list (Variable step)
-		while (game->cmd_list_->commands_.cbegin() != game->cmd_list_->commands_.cend()) {
-			data.package_kind = kDataPackageKind_Build;
-			data.build.sender_id = client.id;
-			BuildData* build_data = static_cast<BuildData*>(game->cmd_list_->commands_[0]);
-			data.build.kind_ = (int)build_data->kind_; // Tower
-			data.build.x = build_data->x;
-			data.build.y = build_data->y;
-			data.build.build_kind = build_data->build_kind;
+		while (send_cmd_count > 0) {
+			if (game->cmd_list_->commands_[0]->kind_ == kDataPackageKind_Build) {
+				data.package_kind = kDataPackageKind_Build;
+				data.build.sender_id = client.id;
+				data.build.kind_ = (int)kDataPackageKind_Build; // Tower
+				BuildData* build_data = static_cast<BuildData*>(game->cmd_list_->commands_[0]);
+				data.build.x = build_data->x;
+				data.build.y = build_data->y;
+				data.build.build_kind = build_data->build_kind;
+			}
+			else if (game->cmd_list_->commands_[0]->kind_ == kDataPackageKind_Unit) {
+				data.package_kind = kDataPackageKind_Unit;
+				data.unit.sender_id = client.id;
+				data.unit.kind_ = (int)kDataPackageKind_Unit;
+				UnitData* unit_data = static_cast<UnitData*>(game->cmd_list_->commands_[0]);
+				data.unit.x = unit_data->x;
+				data.unit.y = unit_data->y;
+				data.unit.id = unit_data->id;
+				data.unit.active = unit_data->active;
+				data.unit.hit_points = unit_data->hit_points;
+			}
 
 			send(sock, (char*)&data, sizeof(DataPackage), 0);
 
 			game->cmd_list_->commands_.erase(game->cmd_list_->commands_.cbegin());
+			send_cmd_count--;
 		}
 
 		// Receive first packet with num of commands from the other player
@@ -98,7 +114,7 @@ static DWORD socket_thread(void* game_data) {
 		if (result > 0) { // Something received
 			if (data.header.cmd_count_ > 0) {
 				receiving_cmd_count = data.header.cmd_count_;
-				printf("\n NumCommands: %d", data.header.cmd_count_);
+				printf("\n Frame %d: Recv %d cmds", executed_times, data.header.cmd_count_);
 			}
 		}
 		else if (result == 0) {
@@ -113,8 +129,21 @@ static DWORD socket_thread(void* game_data) {
 		while (receiving_cmd_count > 0) {
 			result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
 			if (result > 0) { // Something received
-				BuildData* build_data = CreateBuildData(data.build.sender_id, glm::vec2(data.build.x, data.build.y), data.build.build_kind);
-				game->recv_cmd_list_->commands_.push_back(build_data);
+				if (data.package_kind == kDataPackageKind_Build) {
+					BuildData* build_data = CreateBuildData(data.build.sender_id, glm::vec2(data.build.x, data.build.y), data.build.build_kind);
+					game->recv_cmd_list_->commands_.push_back(build_data);
+				}
+				else if (data.package_kind == kDataPackageKind_StartGame) {
+					StartGame* start_data = new StartGame();
+					start_data->kind_ = (int)kDataPackageKind_StartGame;
+					start_data->start = 1;
+					game->recv_cmd_list_->commands_.push_back(start_data);
+				}
+				else if (data.package_kind == kDataPackageKind_Unit) {
+					UnitData* unit_data = CreateUnitData(data.unit.sender_id, glm::vec2(data.unit.x, data.unit.y),
+						data.unit.id, data.unit.hit_points, data.unit.active);
+					game->recv_cmd_list_->commands_.push_back(unit_data);
+				}
 			}
 			else if (result == 0) {
 				printf("\n Lost connection. Game finished.");
@@ -127,7 +156,7 @@ static DWORD socket_thread(void* game_data) {
 			receiving_cmd_count--;
 		}
 
-
+		executed_times++;
 		SuspendThread(hThread);
 
   }

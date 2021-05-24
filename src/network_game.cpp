@@ -70,10 +70,12 @@ void NetworkGame::loadGame() {
 	// Create game things
 	build_manager_ = new BuildManager();
 	unit_manager_ = new UnitManager();
-	unit_manager_->init();
+	unit_manager_->init(client_id_);
 
 	game_menus_ = new GameMenus();
 	game_menus_->initGUI();
+
+	game_started_ = false;
 
 }
 
@@ -148,15 +150,10 @@ void NetworkGame::update(uint32_t time_step) {
 		}
 	}
 
-	// Execute other player received commands
-	while (recv_cmd_list_->commands_.cbegin() != recv_cmd_list_->commands_.cend()) {
-		BuildData* build_data = static_cast<BuildData*>(recv_cmd_list_->commands_[0]);
-		build_manager_->createBuilding(false, build_data->x, build_data->y, build_data->sender_id, build_data->build_kind);
-
-		recv_cmd_list_->commands_.erase(recv_cmd_list_->commands_.cbegin());
-	}
-
 	NetworkGame::instance().scene_->update(time_step);
+
+	// Execute other player received commands
+	processNetCommands();
 	
 }
 
@@ -203,6 +200,46 @@ void NetworkGame::close() {
 Scene* NetworkGame::getScene(){
 
 	return scene_;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void NetworkGame::processNetCommands(){
+
+	while (recv_cmd_list_->commands_.cbegin() != recv_cmd_list_->commands_.cend()) {
+		switch (recv_cmd_list_->commands_[0]->kind_){
+		case kDataPackageKind_StartGame: {
+			game_started_ = true;
+			break;
+		}
+		case	kDataPackageKind_ServerTick: {
+			break;
+		}
+		case kDataPackageKind_Build: {
+			BuildData* build_data = static_cast<BuildData*>(recv_cmd_list_->commands_[0]);
+			build_manager_->createBuilding(false, build_data->x, build_data->y, build_data->sender_id, build_data->build_kind);
+			break;
+		}
+		case kDataPackageKind_Unit: {
+			UnitData* unit_data = static_cast<UnitData*>(recv_cmd_list_->commands_[0]);
+			// Check if not created, create it if not, update else
+			if (unit_manager_->isUnitCreated(unit_data->sender_id, unit_data->id)) {
+				unit_manager_->updateUnit(false, *unit_data);
+			}
+			else {
+				unit_manager_->createUnit(false, unit_data->sender_id);
+			}
+			break;
+		}
+		default: {
+			break;
+		}
+		}
+		
+		// Delete first command
+		recv_cmd_list_->commands_.erase(recv_cmd_list_->commands_.cbegin());
+	}
 
 }
 

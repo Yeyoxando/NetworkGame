@@ -11,6 +11,9 @@
 
 #include "path.h"
 #include "agent.h"
+#include "network_data.h"
+
+#include <vector>
 
 // ------------------------------------------------------------------------- //
 
@@ -19,19 +22,30 @@ public:
 	UnitManager();
 	~UnitManager();
 
-	void init();
+	void init(int client_id);
 
 	void drawPaths();
+
+	Agent* createUnit(bool send_command, int client_id);
+
+	void updateUnit(bool send_command, UnitData& data);
+
+	void killUnit(bool send_command, UnitData& data);
+
+	bool isUnitCreated(int player_id, int unit_id);
 
 protected:
 	void initUnits();
 	void initPaths();
 
-	Path* p1_path;
-	Path* p2_path;
 
-	Agent* agent_p1;
-	Agent* agent_p2;
+	Path* p1_path_;
+	Path* p2_path_;
+
+	std::vector<Agent*> agents_p1_;
+	std::vector<Agent*> agents_p2_;
+
+	int client_id_;
 
 };
 
