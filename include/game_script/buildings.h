@@ -38,8 +38,8 @@ public:
 	bool checkAndUseResourcesRequired(bool waste_resources);
 	int addResourcesEarned(int pos_x, int pos_y, int build_kind);
 
-	bool checkForBuilding(glm::vec2 build_pos);
-	bool checkForSurroundingBuildings(glm::vec2 build_pos);
+	bool checkForBuilding(glm::vec2 build_pos, int player_id);
+	bool checkForSurroundingBuildings(glm::vec2 build_pos, int player_id);
 
 	Sprite* getBuildingSprite(GameObject& go, BuildKind build_kind, int player_id);
 
@@ -90,9 +90,9 @@ public:
 	Tower();
 	~Tower();
 
-	const int kPeopleCost = 2;
-	const int kFoodCost = 0;
-	const int kWoodCost = 3;
+	static const int kPeopleCost = 2;
+	static const int kFoodCost = 0;
+	static const int kWoodCost = 4;
 
 	virtual void update(uint32_t time_step) override; // each frame
 	virtual void draw() override; // each frame
@@ -111,9 +111,11 @@ public:
 	House();
 	~House();
 
-	const int kPeopleCost = 0;
-	const int kFoodCost = 3;
-	const int kWoodCost = 2;
+	static const int kPeopleGain = 4;
+
+	static const int kPeopleCost = 0;
+	static const int kFoodCost = 6;
+	static const int kWoodCost = 3;
 
 	//virtual void update(uint32_t time_step) override; // each frame
 	//void update(); // Only when server send a tick
@@ -129,9 +131,9 @@ public:
 	Farm();
 	~Farm();
 
-	const int kPeopleCost = 2;
-	const int kFoodCost = 0;
-	const int kWoodCost = 4;
+	static const int kPeopleCost = 4;
+	static const int kFoodCost = 0;
+	static const int kWoodCost = 8;
 
 	//virtual void update(uint32_t time_step) override; // each frame
 	virtual void update() override; // Only when server send a tick
@@ -150,9 +152,9 @@ public:
 	Woodhouse();
 	~Woodhouse();
 
-	const int kPeopleCost = 2;
-	const int kFoodCost = 0;
-	const int kWoodCost = 3;
+	static const int kPeopleCost = 3;
+	static const int kFoodCost = 0;
+	static const int kWoodCost = 10;
 
 	//virtual void update(uint32_t time_step) override; // each frame
 	virtual void update() override; // Only when server send a tick

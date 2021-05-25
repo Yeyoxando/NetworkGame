@@ -113,7 +113,7 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 
 	if (player_id == 2) { // Player 2 Building
 		// Previous comprobations for placement
-		if (tile_value == p2_build_tiles[0] && !checkForBuilding(pos)) {
+		if (tile_value == p2_build_tiles[0] && !checkForBuilding(pos, player_id)) {
 			if (build_kind == kBuildKind_DefenseTower) {
 				if (NetworkGame::instance().getScene()->map_->
 						checkFourAdjacentTiles(pos, Tilemap::kTileKind_RoadBuildable) == 0) return;
@@ -139,7 +139,7 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 	}
 	else { // Player 1 Building
 		// Previous comprobations for placement
-		if (tile_value == p1_build_tiles[0] && !checkForBuilding(pos)) {
+		if (tile_value == p1_build_tiles[0] && !checkForBuilding(pos, player_id)) {
 			if (build_kind == kBuildKind_DefenseTower) {
 				if (NetworkGame::instance().getScene()->map_->
 					checkFourAdjacentTiles(pos, Tilemap::kTileKind_RoadBuildable) == 0) return;
@@ -174,33 +174,33 @@ bool BuildManager::checkAndUseResourcesRequired(bool waste_resources){
 
 	switch (selected_build_){
 	case kBuildKind_DefenseTower: {
-		if (people_pieces_ >= 2 && wood_pieces_ >= 2) {
-			people_pieces_ -= 2;
-			wood_pieces_ -= 2;
+		if (people_pieces_ >= Tower::kPeopleCost && wood_pieces_ >= Tower::kWoodCost) {
+			people_pieces_ -= Tower::kPeopleCost;
+			wood_pieces_ -= Tower::kWoodCost;
 			return true;
 		}
 		break;
 	}
 	case kBuildKind_House: {
-		if (food_pieces_ >= 3 && wood_pieces_ >= 2) {
-			food_pieces_ -= 3;
-			wood_pieces_ -= 2;
+		if (food_pieces_ >= House::kFoodCost && wood_pieces_ >= House::kWoodCost) {
+			food_pieces_ -= House::kFoodCost;
+			wood_pieces_ -= House::kWoodCost;
 			return true;
 		}
 		break;
 	}
 	case kBuildKind_Farm: {
-		if (people_pieces_ >= 2 && wood_pieces_ >= 4) {
-			people_pieces_ -= 2;
-			wood_pieces_ -= 4;
+		if (people_pieces_ >= Farm::kPeopleCost && wood_pieces_ >= Farm::kWoodCost) {
+			people_pieces_ -= Farm::kPeopleCost;
+			wood_pieces_ -= Farm::kWoodCost;
 			return true;
 		}
 		break;
 	}
 	case kBuildKind_WoodHouse: {
-		if (people_pieces_ >= 2 && wood_pieces_ >= 3) {
-			people_pieces_ -= 2;
-			wood_pieces_ -= 3;
+		if (people_pieces_ >= Woodhouse::kPeopleCost && wood_pieces_ >= Woodhouse::kWoodCost) {
+			people_pieces_ -= Woodhouse::kPeopleCost;
+			wood_pieces_ -= Woodhouse::kWoodCost;
 			return true;
 		}
 		break;
@@ -228,7 +228,7 @@ int BuildManager::addResourcesEarned(int pos_x, int pos_y, int build_kind){
 		break;
 	}
 	case kBuildKind_House: {
-		resources_earned = 3;
+		resources_earned = House::kPeopleGain;
 		people_pieces_ += resources_earned;
 		break;
 	}
@@ -257,7 +257,32 @@ int BuildManager::addResourcesEarned(int pos_x, int pos_y, int build_kind){
 
 // ------------------------------------------------------------------------- //
 
-bool BuildManager::checkForBuilding(glm::vec2 build_pos){
+bool BuildManager::checkForBuilding(glm::vec2 build_pos, int player_id){
+
+	int current_tile_value_x = (int)build_pos.x / 16;
+	int current_tile_value_y = (int)build_pos.y / 16;
+	int aux_tile_value_x, aux_tile_value_y;
+
+	if (player_id == 2) {
+		for (int i = 0; i < p2_buildings.size(); ++i) {
+			aux_tile_value_x = (int)p2_buildings[i]->transform_.position_.x / 16;
+			aux_tile_value_y = (int)p2_buildings[i]->transform_.position_.y / 16;
+			if (aux_tile_value_x == current_tile_value_x &&
+				aux_tile_value_y == current_tile_value_y) {
+				return true;
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < p1_buildings.size(); ++i) {
+			aux_tile_value_x = (int)p1_buildings[i]->transform_.position_.x / 16;
+			aux_tile_value_y = (int)p1_buildings[i]->transform_.position_.y / 16;
+			if (aux_tile_value_x == current_tile_value_x &&
+				aux_tile_value_y == current_tile_value_y) {
+				return true;
+			}
+		}
+	}
 
 	return false;
 
@@ -265,7 +290,7 @@ bool BuildManager::checkForBuilding(glm::vec2 build_pos){
 
 // ------------------------------------------------------------------------- //
 
-bool BuildManager::checkForSurroundingBuildings(glm::vec2 build_pos){
+bool BuildManager::checkForSurroundingBuildings(glm::vec2 build_pos, int player_id){
 
 	return false;
 

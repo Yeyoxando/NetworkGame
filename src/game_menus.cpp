@@ -142,11 +142,16 @@ void GameMenus::manageGUI() {
 
 
 	// Selected menu
-	if (build_mode_) {
-		drawBuildingMenu();
+	if (!NetworkGame::instance().game_started_) {
+		ImGui::Text("Waiting for another player to join the game...");
 	}
 	else {
-		drawBasicMenu();
+		if (build_mode_) {
+			drawBuildingMenu();
+		}
+		else {
+			drawBasicMenu();
+		}
 	}
 
 	// Resources

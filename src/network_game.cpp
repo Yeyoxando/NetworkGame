@@ -96,7 +96,7 @@ void NetworkGame::input() {
 	case SDL_KEYDOWN: {
 		/* Check the SDLKey values and move change the coords */
 		switch (events_.key.keysym.sym) {
-		case SDLK_b: {
+		/*case SDLK_b: {
 			game_menus_->build_mode_ = !game_menus_->build_mode_;
 			if (game_menus_->build_mode_) {
 				build_manager_->mouse_build_object_->active_ = true;
@@ -105,7 +105,7 @@ void NetworkGame::input() {
 				build_manager_->mouse_build_object_->active_ = false;
 			}
 			break;
-		}
+		}*/
 		default: {
 			break;
 		}
