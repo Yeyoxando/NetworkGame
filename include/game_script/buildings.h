@@ -29,12 +29,14 @@ public:
 	BuildManager();
 	~BuildManager();
 
+	void init(int client_id);
+
 	void selectBuilding(BuildKind build_kind);
 
-	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind);
+	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind, bool initial_building = false);
 
 	bool checkAndUseResourcesRequired(bool waste_resources);
-	int addResourcesEarned(int pos_x, int pos_y);
+	int addResourcesEarned(int pos_x, int pos_y, int build_kind);
 
 	bool checkForBuilding(glm::vec2 build_pos);
 	bool checkForSurroundingBuildings(glm::vec2 build_pos);

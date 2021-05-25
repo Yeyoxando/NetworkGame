@@ -42,9 +42,9 @@ BuildManager::BuildManager(){
 
 	selected_build_ = kBuildKind_DefenseTower;
 
-	people_pieces_ = 3;
-	food_pieces_ = 8;
-	wood_pieces_ = 5;
+	people_pieces_ = 0; // 3
+	food_pieces_ = 0; // 8
+	wood_pieces_ = 0; // 5
 
 }
 
@@ -69,6 +69,29 @@ BuildManager::~BuildManager(){
 
 // ------------------------------------------------------------------------- //
 
+void BuildManager::init(int client_id) {
+
+	//Create initial players buildings, as the resource cost has to be balanced and you
+	// cannot build everything from start
+
+	// 1 house -> 4 people? instead of 3
+	if (client_id == 2) {
+		createBuilding(true, 520, 80, client_id, (int)kBuildKind_House, true);
+		createBuilding(true, 328, 112, client_id, (int)kBuildKind_Farm, true);
+		createBuilding(true, 376, 272, client_id, (int)kBuildKind_WoodHouse, true);
+	}
+	else {
+		createBuilding(true, 88, 320, client_id, (int)kBuildKind_House, true);
+		createBuilding(true, 264, 288, client_id, (int)kBuildKind_Farm, true);
+		createBuilding(true, 24, 64, client_id, (int)kBuildKind_WoodHouse, true);
+	}
+	// 1 farm -> 8 food
+	// 1 woodhouse -> 5 wood
+
+}
+
+// ------------------------------------------------------------------------- //
+
 void BuildManager::selectBuilding(BuildKind build_kind){
 
 	mouse_build_object_->removeComponent(ComponentKind::kComponentKind_Sprite);
@@ -81,7 +104,7 @@ void BuildManager::selectBuilding(BuildKind build_kind){
 
 // ------------------------------------------------------------------------- //
 
-void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind){
+void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind, bool initial_building){
 
 	// Get current tile value for the mouse position
 	int tile_value = basic_map[(pos_x / 16) +	((pos_y / 16) * 38)];
@@ -97,12 +120,15 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			}
 
 			// If everything okay check for resources and waste them if possible
-			if (checkAndUseResourcesRequired(send_command)) {
+			bool waste_resources = send_command;
+			if (initial_building) waste_resources = false;
+
+			if (checkAndUseResourcesRequired(waste_resources)) {
 
 				Building* new_build = createBuildingGameObject(player_id, pos, build_kind);
 
 				if (send_command) {
-					int tick_resources = addResourcesEarned(pos_x, pos_y);
+					int tick_resources = addResourcesEarned(pos_x, pos_y, build_kind);
 					new_build->setResources(tick_resources);
 					// Add command to the cmd list for when the net thread starts working again
 					BuildData* build_cmd = CreateBuildData(player_id, pos, build_kind);
@@ -120,13 +146,16 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			}
 
 			// If everything okay check for resources and waste them if possible
-			if (checkAndUseResourcesRequired(send_command)) {
+			bool waste_resources = send_command;
+			if (initial_building) waste_resources = false;
+
+			if (checkAndUseResourcesRequired(waste_resources)) {
 				
 				Building* new_build = createBuildingGameObject(player_id, pos, build_kind);
 
 				if (send_command) {
 					// Add command to the cmd list for when the net thread starts working again
-					int tick_resources = addResourcesEarned(pos_x, pos_y);
+					int tick_resources = addResourcesEarned(pos_x, pos_y, build_kind);
 					new_build->setResources(tick_resources);
 					BuildData* build_cmd = CreateBuildData(player_id, pos, build_kind);
 					NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
@@ -188,12 +217,12 @@ bool BuildManager::checkAndUseResourcesRequired(bool waste_resources){
 
 // ------------------------------------------------------------------------- //
 
-int BuildManager::addResourcesEarned(int pos_x, int pos_y){
+int BuildManager::addResourcesEarned(int pos_x, int pos_y, int build_kind){
 
 	Tilemap* map = NetworkGame::instance().getScene()->map_;
 	int resources_earned = 0;
 
-	switch (selected_build_) {
+	switch (build_kind) {
 	case kBuildKind_DefenseTower: {
 		
 		break;

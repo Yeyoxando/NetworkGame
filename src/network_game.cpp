@@ -48,7 +48,7 @@ void NetworkGame::init() {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
 
-	window_ = SDL_CreateWindow("Network game", SDL_WINDOWPOS_CENTERED, 
+	window_ = SDL_CreateWindow("Age of Towers", SDL_WINDOWPOS_CENTERED, 
 		SDL_WINDOWPOS_CENTERED, 608, 600, SDL_WINDOW_SHOWN);
 	
 
@@ -69,6 +69,7 @@ void NetworkGame::loadGame() {
 
 	// Create game things
 	build_manager_ = new BuildManager();
+	build_manager_->init(client_id_);
 	unit_manager_ = new UnitManager();
 	unit_manager_->init(client_id_);
 
