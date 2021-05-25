@@ -99,10 +99,11 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			// If everything okay check for resources and waste them if possible
 			if (checkAndUseResourcesRequired(send_command)) {
 
-				createBuildingGameObject(player_id, pos, build_kind);
+				Building* new_build = createBuildingGameObject(player_id, pos, build_kind);
 
 				if (send_command) {
-					addResourcesEarned(pos_x, pos_y);
+					int tick_resources = addResourcesEarned(pos_x, pos_y);
+					new_build->setResources(tick_resources);
 					// Add command to the cmd list for when the net thread starts working again
 					BuildData* build_cmd = CreateBuildData(player_id, pos, build_kind);
 					NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
@@ -121,11 +122,12 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			// If everything okay check for resources and waste them if possible
 			if (checkAndUseResourcesRequired(send_command)) {
 				
-				createBuildingGameObject(player_id, pos, build_kind);
+				Building* new_build = createBuildingGameObject(player_id, pos, build_kind);
 
 				if (send_command) {
 					// Add command to the cmd list for when the net thread starts working again
-					addResourcesEarned(pos_x, pos_y);
+					int tick_resources = addResourcesEarned(pos_x, pos_y);
+					new_build->setResources(tick_resources);
 					BuildData* build_cmd = CreateBuildData(player_id, pos, build_kind);
 					NetworkGame::instance().cmd_list_->commands_.push_back(build_cmd);
 				}
@@ -296,15 +298,22 @@ Sprite* BuildManager::getBuildingSprite(GameObject& go, BuildKind build_kind, in
 
 void BuildManager::updateBuildings(int client_id){
 
-	for (int i = 0; i < p1_buildings.size(); ++i) {
-		p1_buildings[i]->update(); // virtual override on building classes
+	if (client_id == 2) {
+		for (int i = 0; i < p2_buildings.size(); ++i) {
+			p2_buildings[i]->update(); // virtual override on building classes
+		}
+	}
+	else {
+		for (int i = 0; i < p1_buildings.size(); ++i) {
+			p1_buildings[i]->update(); // virtual override on building classes
+		}
 	}
 
 }
 
 // ------------------------------------------------------------------------- //
 
-void BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind){
+Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind){
 
 	Building* building = nullptr;
 
@@ -352,6 +361,8 @@ void BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, int bu
 	}
 	
 	NetworkGame::instance().getScene()->addGameObject(building);
+
+	return building;
 
 }
 
@@ -453,6 +464,14 @@ void Farm::update() {
 
 // ------------------------------------------------------------------------- //
 
+void Farm::setResources(int new_tick_resources){
+
+	tick_resources_ = new_tick_resources;
+
+}
+
+// ------------------------------------------------------------------------- //
+
 Woodhouse::Woodhouse() {
 
 	build_kind_ = kBuildKind_WoodHouse;
@@ -474,6 +493,14 @@ void Woodhouse::update() {
 
 	// Give player this woodhouse resources when the server ticks
 	NetworkGame::instance().build_manager_->wood_pieces_ += tick_resources_;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Woodhouse::setResources(int new_tick_resources){
+
+	tick_resources_ = new_tick_resources;
 
 }
 

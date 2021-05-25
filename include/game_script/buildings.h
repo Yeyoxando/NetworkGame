@@ -54,7 +54,7 @@ public:
 	int wood_pieces_;
 
 protected:
-	void createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind);
+	Building* createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind);
 
 	Sprite* build_sprites_[4];
 
@@ -70,6 +70,7 @@ public:
 	int build_id_;
 
 	virtual void update() {};
+	virtual void setResources(int new_tick_resources) {};
 
 	virtual void update(uint32_t time_step) override { GameObject::update(time_step); }
 	virtual void draw() override { GameObject::draw(); }
@@ -132,6 +133,7 @@ public:
 
 	//virtual void update(uint32_t time_step) override; // each frame
 	virtual void update() override; // Only when server send a tick
+	virtual void setResources(int new_tick_resources) override;
 
 	int tick_resources_;
 
@@ -152,6 +154,7 @@ public:
 
 	//virtual void update(uint32_t time_step) override; // each frame
 	virtual void update() override; // Only when server send a tick
+	virtual void setResources(int new_tick_resources) override;
 
 	int tick_resources_;
 

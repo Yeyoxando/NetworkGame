@@ -150,11 +150,11 @@ void GameMenus::manageGUI() {
 	}
 
 	// Resources
-	ImGui::SetCursorPos(ImVec2(390, 180));
+	ImGui::SetCursorPos(ImVec2(370, 180));
 	ImGui::Text("People: %d", NetworkGame::instance().build_manager_->people_pieces_);
-	ImGui::SetCursorPos(ImVec2(480, 180));
+	ImGui::SetCursorPos(ImVec2(460, 180));
 	ImGui::Text("Food: %d", NetworkGame::instance().build_manager_->food_pieces_);
-	ImGui::SetCursorPos(ImVec2(550, 180));
+	ImGui::SetCursorPos(ImVec2(530, 180));
 	ImGui::Text("Wood: %d", NetworkGame::instance().build_manager_->wood_pieces_);
 
 
