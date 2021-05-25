@@ -211,9 +211,17 @@ void NetworkGame::processNetCommands(){
 		switch (recv_cmd_list_->commands_[0]->kind_){
 		case kDataPackageKind_StartGame: {
 			game_started_ = true;
+
+			unit_manager_->active_p1_units = 1;
+			unit_manager_->active_p2_units = 1;
 			break;
 		}
-		case	kDataPackageKind_ServerTick: {
+		case kDataPackageKind_UnitsEnd: {
+			//printf("\nProcess Unit end player %d", client_id_);
+			// add resources
+			build_manager_->updateBuildings(client_id_);
+			// Reactivate units
+			unit_manager_->reactivateUnits(client_id_);
 			break;
 		}
 		case kDataPackageKind_Build: {

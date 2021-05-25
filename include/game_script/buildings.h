@@ -41,6 +41,8 @@ public:
 
 	Sprite* getBuildingSprite(GameObject& go, BuildKind build_kind, int player_id);
 
+	void updateBuildings(int client_id);// add the resources for all buildings
+
 	std::vector<Building*> p1_buildings;
 	std::vector<Building*> p2_buildings;
 
@@ -66,6 +68,8 @@ public:
 
 	int client_owner_id_;
 	int build_id_;
+
+	virtual void update() {};
 
 	virtual void update(uint32_t time_step) override { GameObject::update(time_step); }
 	virtual void draw() override { GameObject::draw(); }
@@ -127,7 +131,7 @@ public:
 	const int kWoodCost = 4;
 
 	//virtual void update(uint32_t time_step) override; // each frame
-	void update(); // Only when server send a tick
+	virtual void update() override; // Only when server send a tick
 
 	int tick_resources_;
 
@@ -147,7 +151,7 @@ public:
 	const int kWoodCost = 3;
 
 	//virtual void update(uint32_t time_step) override; // each frame
-	void update(); // Only when server send a tick
+	virtual void update() override; // Only when server send a tick
 
 	int tick_resources_;
 

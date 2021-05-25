@@ -17,6 +17,9 @@ UnitManager::UnitManager(){
 	p1_path_ = nullptr;
 	p2_path_ = nullptr;
 
+	active_p1_units = 0;
+	active_p2_units = 0;
+
 }
 
 // ------------------------------------------------------------------------- //
@@ -162,6 +165,50 @@ bool UnitManager::isUnitCreated(int player_id, int unit_id){
 
 	return false;
 	
+}
+
+// ------------------------------------------------------------------------- //
+
+void UnitManager::checkUnitsDisabled(bool send_command, int client_id){
+
+	if (client_id_ == 2) {
+		if (send_command && active_p2_units == 0) {
+			// Send server tick
+			UnitsEnd* units_end = new UnitsEnd();
+			units_end->kind_ = (int)kDataPackageKind_UnitsEnd;
+			units_end->sender_id = client_id;
+			units_end->end = 1;
+			NetworkGame::instance().cmd_list_->commands_.push_back(units_end);
+			//printf("\nAdded unit end package.");
+		}
+	}
+	else {
+		if (send_command && active_p1_units == 0) {
+			// Send server tick
+			UnitsEnd* units_end = new UnitsEnd();
+			units_end->kind_ = (int)kDataPackageKind_UnitsEnd;
+			units_end->sender_id = client_id;
+			units_end->end = 1;
+			NetworkGame::instance().cmd_list_->commands_.push_back(units_end);
+			//printf("\nAdded unit end package.");
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void UnitManager::reactivateUnits(int client_id){
+
+	if (client_id == 2) {
+		active_p2_units = agents_p2_.size();
+		agents_p2_[0]->active_= true;
+	}
+	else {
+		active_p1_units = agents_p1_.size();
+		agents_p1_[0]->active_= true;
+	}
+
 }
 
 // ------------------------------------------------------------------------- //

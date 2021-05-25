@@ -37,10 +37,16 @@ public:
 
 	bool isUnitCreated(int player_id, int unit_id);
 
+	void checkUnitsDisabled(bool send_command, int client_id);
+
+	void reactivateUnits(int client_id);
+
 protected:
 	void initUnits();
 	void initPaths();
 
+	int active_p1_units;
+	int active_p2_units;
 
 	Path* p1_path_;
 	Path* p2_path_;
@@ -49,6 +55,9 @@ protected:
 	std::vector<Agent*> agents_p2_;
 
 	int client_id_;
+
+	friend class NetworkGame;
+	friend class Agent;
 
 };
 

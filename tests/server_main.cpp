@@ -16,9 +16,11 @@
 
 static int connected_clients = 0;
 bool player_disconnected = false;
-bool send_server_tick;
 bool start_game_p1;
 bool start_game_p2;
+int recv_units_end = 0;
+bool units_end_p1 = false;
+bool units_end_p2 = false;
 static SOCKET client_sock[2];
 
 // ------------------------------------------------------------------------- //
@@ -37,7 +39,7 @@ static DWORD client_thread(void* client_socket) {
   client_count = ++connected_clients;
   unlockMutex();
 
-  printf("\n Client thread started.");
+  printf("\nClient thread started.");
 
 	//Prepare client package to set player id
 	data.package_kind = kDataPackageKind_Client;
@@ -61,10 +63,10 @@ static DWORD client_thread(void* client_socket) {
 		if (result > 0) { // Something received
       if (data.header.cmd_count_ > 0) {
         receiving_cmd_count = data.header.cmd_count_;
-        printf("\n Player %d: Recv %d Commands", client_thread_id, data.header.cmd_count_);
+        //printf("\n Player %d: Recv %d Commands", client_thread_id, data.header.cmd_count_);
       }
 		}
-		else if (result == 0) {
+    else {
 			lockMutex();
 			client_count = --connected_clients;
 			player_disconnected = true;
@@ -73,18 +75,22 @@ static DWORD client_thread(void* client_socket) {
 			printf("\n A player has disconnected from the game.");
 			break;
 		}
-		else {
-			printf("\n Player %d data receive failed.", client_count);
-		}
 
 	  // Recv and process while not all commands have been received
     while (receiving_cmd_count > 0) {
 			result = recv(sock, (char*)&data, sizeof(DataPackage), 0);
 			if (result > 0) { // Something received
-				// Get build command and send to the other player
-        data_packages.push_back(data);
+				// Get  command and send to the other player
+        if (data.package_kind == kDataPackageKind_UnitsEnd) {
+          lockMutex();
+          recv_units_end++;
+          unlockMutex();
+        }
+        else {
+          data_packages.push_back(data);
+        }
 			}
-			else if (result == 0) {
+      else {
 				lockMutex();
 				client_count = --connected_clients;
 				player_disconnected = true;
@@ -93,14 +99,12 @@ static DWORD client_thread(void* client_socket) {
 				printf("\n A player has disconnected from the game.");
 				break;
 			}
-			else {
-				printf("\n Player %d data receive failed.", client_count);
-			}
       
       receiving_cmd_count--;
     }
 
     lockMutex();
+    // GAME START
     if (start_game_p1 && client_thread_id == 1) {
       start_game_p1 = false;
       data.package_kind = kDataPackageKind_StartGame;
@@ -114,6 +118,26 @@ static DWORD client_thread(void* client_socket) {
 			data.start.start = 1;
 			data_packages.push_back(data);
 		}
+
+    // UNITS END
+    if (recv_units_end == 2) {
+      recv_units_end = 0;
+      units_end_p1 = true;
+      units_end_p2 = true;
+    }
+    if (units_end_p1 && client_thread_id == 1) {
+      units_end_p1 = false;    
+      data.package_kind = kDataPackageKind_UnitsEnd;
+      data.units_end.end = 1;
+      data_packages.push_back(data);
+    }
+		if (units_end_p2 && client_thread_id == 2) {
+      units_end_p2 = false;    
+      data.package_kind = kDataPackageKind_UnitsEnd;
+      data.units_end.end = 1;
+      data_packages.push_back(data);
+		}
+
     unlockMutex();
 
 		// Send first packet with number of commands
@@ -123,9 +147,9 @@ static DWORD client_thread(void* client_socket) {
 		data.header.cmd_count_ = data_packages.size();
     int opponent_socket = client_count == 1 ? 1 : 0;
 		send(client_sock[opponent_socket], (char*)&data, sizeof(DataPackage), 0);
-		if (data.header.cmd_count_ > 0) {
+		/*if (data.header.cmd_count_ > 0) {
 			printf("\nPlayer %d send %d data to the other player", client_thread_id, data.header.cmd_count_);
-		}
+		}*/
 
 	  // Send while not all commands have been sent
 		// Send as many commands as have been accumulated in the cmd list (Variable step)
@@ -196,8 +220,10 @@ int main() {
   lockMutex();
   start_game_p1 = true;
   start_game_p2 = true;
+	units_end_p1 = false;
+	units_end_p2 = false;
   unlockMutex();
-  printf("\ngame started");
+  printf("\nGame started.");
 
   // Wait while 2 clients are connected
   while (internal_clients == 2) {

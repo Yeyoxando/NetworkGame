@@ -74,9 +74,9 @@ static DWORD socket_thread(void* game_data) {
 		data.header.sender_id = client.id;
 		data.header.cmd_count_ = game->cmd_list_->commands_.size();
 		send(sock, (char*)&data, sizeof(DataPackage), 0);
-		if (data.header.cmd_count_ > 0) {
+		/*if (data.header.cmd_count_ > 0) {
 			printf("\nFrame %d: Sending %d cmds.", executed_times, data.header.cmd_count_);
-		}
+		}*/
 		
 		int send_cmd_count = data.header.cmd_count_;
 		// Send as many commands as have been accumulated in the cmd list (Variable step)
@@ -101,6 +101,14 @@ static DWORD socket_thread(void* game_data) {
 				data.unit.active = unit_data->active;
 				data.unit.hit_points = unit_data->hit_points;
 			}
+			else if (game->cmd_list_->commands_[0]->kind_ == (int)kDataPackageKind_UnitsEnd) {
+				data.package_kind = kDataPackageKind_UnitsEnd;
+				data.units_end.sender_id = client.id;
+				data.units_end.kind_ = (int)kDataPackageKind_UnitsEnd;
+				UnitsEnd* units_end_data = static_cast<UnitsEnd*>(game->cmd_list_->commands_[0]);
+				data.units_end.end = units_end_data->end;
+				//printf("\nSend unit end package.");
+			}
 
 			send(sock, (char*)&data, sizeof(DataPackage), 0);
 
@@ -114,7 +122,7 @@ static DWORD socket_thread(void* game_data) {
 		if (result > 0) { // Something received
 			if (data.header.cmd_count_ > 0) {
 				receiving_cmd_count = data.header.cmd_count_;
-				printf("\n Frame %d: Recv %d cmds", executed_times, data.header.cmd_count_);
+				//printf("\n Frame %d: Recv %d cmds", executed_times, data.header.cmd_count_);
 			}
 		}
 		else if (result == 0) {
@@ -134,15 +142,23 @@ static DWORD socket_thread(void* game_data) {
 					game->recv_cmd_list_->commands_.push_back(build_data);
 				}
 				else if (data.package_kind == kDataPackageKind_StartGame) {
-					StartGame* start_data = new StartGame();
-					start_data->kind_ = (int)kDataPackageKind_StartGame;
-					start_data->start = 1;
-					game->recv_cmd_list_->commands_.push_back(start_data);
+					StartGame start_data;
+					start_data.kind_ = (int)kDataPackageKind_StartGame;
+					start_data.start = 1;
+					game->recv_cmd_list_->commands_.push_back(&start_data);
 				}
 				else if (data.package_kind == kDataPackageKind_Unit) {
 					UnitData* unit_data = CreateUnitData(data.unit.sender_id, glm::vec2(data.unit.x, data.unit.y),
 						data.unit.id, data.unit.hit_points, data.unit.active);
 					game->recv_cmd_list_->commands_.push_back(unit_data);
+				}
+				else if (data.package_kind == kDataPackageKind_UnitsEnd) {
+					UnitsEnd* units_end = new UnitsEnd();
+					units_end->sender_id = data.units_end.sender_id;
+					units_end->kind_ = data.package_kind;
+					units_end->end = data.units_end.end;
+					game->recv_cmd_list_->commands_.push_back(units_end);
+					//printf("\nRecv unit end.");
 				}
 			}
 			else if (result == 0) {

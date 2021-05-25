@@ -37,8 +37,8 @@ struct StartGame : public Command {
 	int start;
 };
 
-struct ServerTick : public Command { // Send when all player units are dead
-	int tick;
+struct UnitsEnd : public Command { // Send when all player units are dead
+	int end;
 };
 
 struct BuildData : public Command {
@@ -76,7 +76,7 @@ public:
 enum DataPackageKind {
 	kDataPackageKind_Client = 0,
 	kDataPackageKind_StartGame,
-	kDataPackageKind_ServerTick,
+	kDataPackageKind_UnitsEnd,
 	kDataPackageKind_Header,
 	kDataPackageKind_Build,
 	kDataPackageKind_Unit,
@@ -89,9 +89,9 @@ struct DataPackage {
 
 	union {
 		Client client;
-		ServerTick tick;
 		StartGame start;
 		CommandListHeader	header;
+		UnitsEnd units_end;
 		BuildData build;
 		UnitData unit;
 	};

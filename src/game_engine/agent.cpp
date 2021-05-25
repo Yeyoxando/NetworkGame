@@ -531,6 +531,18 @@ void Agent::MOV_Deterministic(uint32_t time_step) {
       transform_.position_ = glm::vec3(current_path_->first_point(), 0);
       target_ = current_path_->at_point(1);
       active_ = false;
+      // Send unit disactivate command
+			UnitData* unit_data = CreateUnitData(client_owner_id_, pos, unit_id_, 0, false);
+			NetworkGame::instance().unit_manager_->updateUnit(true, *unit_data);
+      // Subtract to the active units count
+      if (client_owner_id_ == 2) {
+        NetworkGame::instance().unit_manager_->active_p2_units -= 1;
+      }
+      else {
+        NetworkGame::instance().unit_manager_->active_p1_units -= 1;
+      }
+      // Check if units count is 0 then send the turn finished package
+      NetworkGame::instance().unit_manager_->checkUnitsDisabled(true, client_owner_id_);
     }
 
   }

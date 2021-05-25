@@ -294,6 +294,16 @@ Sprite* BuildManager::getBuildingSprite(GameObject& go, BuildKind build_kind, in
 
 // ------------------------------------------------------------------------- //
 
+void BuildManager::updateBuildings(int client_id){
+
+	for (int i = 0; i < p1_buildings.size(); ++i) {
+		p1_buildings[i]->update(); // virtual override on building classes
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
 void BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind){
 
 	Building* building = nullptr;
