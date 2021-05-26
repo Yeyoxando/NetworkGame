@@ -537,12 +537,21 @@ void Agent::MOV_Deterministic(uint32_t time_step) {
       // Subtract to the active units count
       if (client_owner_id_ == 2) {
         NetworkGame::instance().unit_manager_->active_p2_units -= 1;
+        // Update enemy castle life
+        int new_castle_life = NetworkGame::instance().castle_life_p1_ - 1;
+        NetworkGame::instance().updateCastleLife(true, 1, new_castle_life);
+        printf("\nPlayer 2 hit.");
       }
       else {
-        NetworkGame::instance().unit_manager_->active_p1_units -= 1;
+				NetworkGame::instance().unit_manager_->active_p1_units -= 1;
+				// Update enemy castle life
+				int new_castle_life = NetworkGame::instance().castle_life_p2_ - 1;
+				NetworkGame::instance().updateCastleLife(true, 2, new_castle_life);
+        printf("\nPlayer 1 hit.");
       }
       // Check if units count is 0 then send the turn finished package
       NetworkGame::instance().unit_manager_->checkUnitsDisabled(true, client_owner_id_);
+
     }
 
   }

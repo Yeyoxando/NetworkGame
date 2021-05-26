@@ -21,6 +21,8 @@ NetworkGame::NetworkGame(){
 
 	window_should_close_ = false;
 
+	client_id_ = 0;
+
 }
 
 // ------------------------------------------------------------------------- //
@@ -49,7 +51,7 @@ void NetworkGame::init() {
 	
 
 	window_ = SDL_CreateWindow("Age of Towers", SDL_WINDOWPOS_CENTERED, 
-		SDL_WINDOWPOS_CENTERED, 608, 600, SDL_WINDOW_SHOWN);
+		SDL_WINDOWPOS_CENTERED, 608, 640, SDL_WINDOW_SHOWN);
 	
 
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);
@@ -77,6 +79,13 @@ void NetworkGame::loadGame() {
 	game_menus_->initGUI();
 
 	game_started_ = false;
+
+	castle_life_p1_ = 2;
+	castle_life_p2_ = 2;
+
+	game_end_ = false;
+	winner_ = false;
+	loser_ = false;
 
 }
 
@@ -206,6 +215,84 @@ Scene* NetworkGame::getScene(){
 
 // ------------------------------------------------------------------------- //
 
+void NetworkGame::updateCastleLife(bool send_command, int player_id, int castle_life){
+
+	// if life is 0 send the winner cmd too
+
+	if (send_command) {
+		CastleLife* castle_life_cmd = new CastleLife();
+		castle_life_cmd->sender_id = client_id_;
+		castle_life_cmd->kind_ = (int)kDataPackageKind_CastleLife;
+		if (player_id == 2) {
+			castle_life_p2_ = castle_life;			
+			castle_life_cmd->player_id = 2;
+			castle_life_cmd->new_life = castle_life_p2_;
+		}
+		else {
+			castle_life_p1_ = castle_life;			
+			castle_life_cmd->player_id = 1;
+			castle_life_cmd->new_life = castle_life_p1_;
+		}
+		NetworkGame::instance().cmd_list_->commands_.push_back(castle_life_cmd);
+
+		updateGameWinCondition(true, client_id_);
+	}
+	else {
+		if (player_id == 2) {
+			castle_life_p2_ = castle_life;			
+		}
+		else {
+			castle_life_p1_ = castle_life;
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void NetworkGame::updateGameWinCondition(bool send_command, int winner_id){
+
+	if (send_command) {
+		// the winner player sends the end game cmd
+		if (winner_id == 2) {
+			if (castle_life_p1_ == 0) {
+				EndGame* end_game = new EndGame();
+				end_game->kind_ = (int)kDataPackageKind_EndGame;
+				end_game->sender_id = winner_id;
+				end_game->winner_id = winner_id;
+				NetworkGame::instance().cmd_list_->commands_.push_back(end_game);
+
+				game_end_ = true;
+				winner_ = true;
+				printf("\nPlayer 2 wins");
+			}
+		}
+		else {
+			if (castle_life_p2_ == 0) {
+				EndGame* end_game = new EndGame();
+				end_game->kind_ = (int)kDataPackageKind_EndGame;
+				end_game->sender_id = winner_id;
+				end_game->winner_id = winner_id;
+				NetworkGame::instance().cmd_list_->commands_.push_back(end_game);
+
+				game_end_ = true;
+				winner_ = true;
+				printf("\nPlayer 1 wins");
+			}
+		}
+	}
+	else {
+		// Recv, set lose active
+		game_end_ = true;
+		loser_ = true;
+		printf("\nPlayer lose.");
+	}
+	
+
+}
+
+// ------------------------------------------------------------------------- //
+
 void NetworkGame::processNetCommands(){
 
 	while (recv_cmd_list_->commands_.cbegin() != recv_cmd_list_->commands_.cend()) {
@@ -239,6 +326,16 @@ void NetworkGame::processNetCommands(){
 			else {
 				unit_manager_->createUnit(false, unit_data->sender_id);
 			}
+			break;
+		}
+		case kDataPackageKind_CastleLife: {
+			CastleLife* castle_life = static_cast<CastleLife*>(recv_cmd_list_->commands_[0]);
+			updateCastleLife(false, castle_life->player_id, castle_life->new_life);
+			break;
+		}
+		case kDataPackageKind_EndGame: {
+			EndGame* end_game = static_cast<EndGame*>(recv_cmd_list_->commands_[0]);
+			updateGameWinCondition(false, end_game->winner_id);
 			break;
 		}
 		default: {

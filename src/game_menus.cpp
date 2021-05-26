@@ -34,7 +34,7 @@ void GameMenus::initGUI() {
 
 	// Library things
 	ImGui::CreateContext();
-	ImGuiSDL::Initialize(NetworkGame::instance().renderer_, 608, 600);
+	ImGuiSDL::Initialize(NetworkGame::instance().renderer_, 608, 640);
 
 	ImGuiStyle& style_ = ImGui::GetStyle();
 	style_.Colors[ImGuiCol_PlotLines] = ImVec4(1.0f, 0.5f, 0.0f, 1.00f);
@@ -135,7 +135,7 @@ void GameMenus::manageGUI() {
 
 	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y + 400), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(608, 200), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(608, 240), ImGuiCond_Always);
 
 	static bool p_open = true;
 	ImGui::Begin("Menu", &p_open, window_flags_);
@@ -143,7 +143,31 @@ void GameMenus::manageGUI() {
 
 	// Selected menu
 	if (!NetworkGame::instance().game_started_) {
-		ImGui::Text("Waiting for another player to join the game...");
+		if (NetworkGame::instance().client_id_ > 0) {
+			ImGui::Text("Waiting for another player to join the game...");
+		}
+		else {
+		 ImGui::Text("A connection to the server was not established, try to run the server \n before running a client...");
+		}
+
+		ImGui::SetCursorPos(ImVec2(10, 210));
+		ImGui::Text("Player ID: %d", NetworkGame::instance().client_id_);
+	}
+	else if (NetworkGame::instance().game_end_) {
+		if (NetworkGame::instance().winner_) {
+			ImGui::Text("You have conquered the enemy territory!");
+		}
+		else if(NetworkGame::instance().loser_){
+			ImGui::Text("Your enemy has destroyed your civilization...");
+		}
+
+		// Players info
+		ImGui::SetCursorPos(ImVec2(10, 210));
+		ImGui::Text("Player ID: %d", NetworkGame::instance().client_id_);
+		ImGui::SetCursorPos(ImVec2(325, 210));
+		ImGui::Text("Player 1 life: %d", NetworkGame::instance().castle_life_p1_);
+		ImGui::SetCursorPos(ImVec2(470, 210));
+		ImGui::Text("Player 2 life: %d", NetworkGame::instance().castle_life_p2_);
 	}
 	else {
 		if (build_mode_) {
@@ -152,17 +176,24 @@ void GameMenus::manageGUI() {
 		else {
 			drawBasicMenu();
 		}
+
+		// Resources
+		ImGui::SetCursorPos(ImVec2(360, 180));
+		ImGui::Text("People: %d", NetworkGame::instance().build_manager_->people_pieces_);
+		ImGui::SetCursorPos(ImVec2(450, 180));
+		ImGui::Text("Food: %d", NetworkGame::instance().build_manager_->food_pieces_);
+		ImGui::SetCursorPos(ImVec2(520, 180));
+		ImGui::Text("Wood: %d", NetworkGame::instance().build_manager_->wood_pieces_);
+
+		// Players info
+		ImGui::SetCursorPos(ImVec2(10, 210));
+		ImGui::Text("Player ID: %d", NetworkGame::instance().client_id_);
+		ImGui::SetCursorPos(ImVec2(325, 210));
+		ImGui::Text("Player 1 life: %d", NetworkGame::instance().castle_life_p1_);
+		ImGui::SetCursorPos(ImVec2(470, 210));
+		ImGui::Text("Player 2 life: %d", NetworkGame::instance().castle_life_p2_);
 	}
-
-	// Resources
-	ImGui::SetCursorPos(ImVec2(370, 180));
-	ImGui::Text("People: %d", NetworkGame::instance().build_manager_->people_pieces_);
-	ImGui::SetCursorPos(ImVec2(460, 180));
-	ImGui::Text("Food: %d", NetworkGame::instance().build_manager_->food_pieces_);
-	ImGui::SetCursorPos(ImVec2(530, 180));
-	ImGui::Text("Wood: %d", NetworkGame::instance().build_manager_->wood_pieces_);
-
-
+		
 	ImGui::End();
 
 }
@@ -240,6 +271,22 @@ void GameMenus::drawBuildingMenu() {
 // ------------------------------------------------------------------------- //
 
 void GameMenus::drawUnitsMenu() {
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void GameMenus::drawWinMenu(){
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void GameMenus::drawLoseMenu(){
 
 
 

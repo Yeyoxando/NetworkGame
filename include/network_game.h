@@ -40,8 +40,14 @@ public:
 	Scene* getScene();
 
 	bool window_should_close_;
-
 	int client_id_;
+
+	bool game_end_;
+	bool winner_;
+	bool loser_;
+
+	void updateCastleLife(bool send_command, int player_id, int castle_life);
+	void updateGameWinCondition(bool send_command, int winner_id);
 
 private:
 	NetworkGame();
@@ -69,6 +75,8 @@ private:
 	UnitManager* unit_manager_;
 	GameMenus* game_menus_;
 
+	int castle_life_p1_;
+	int castle_life_p2_;
 
 public:
 	// Network specific

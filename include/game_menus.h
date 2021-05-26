@@ -36,9 +36,10 @@ private:
 	void drawBuildingMenu();
 	void drawUnitsMenu();
 
+	void drawWinMenu();
+	void drawLoseMenu();
+
 	// void drawMainMenu()
-	// void drawWinMenu()
-	// void drawLoseMenu()
 	// void drawDisconnectMenu()
 	// void drawWaitingForConnectionMenu()
 	// void draw...Menu()

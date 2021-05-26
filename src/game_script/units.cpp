@@ -200,6 +200,8 @@ void UnitManager::checkUnitsDisabled(bool send_command, int client_id){
 
 void UnitManager::reactivateUnits(int client_id){
 
+	if (NetworkGame::instance().game_end_) return;
+
 	if (client_id == 2) {
 		active_p2_units = agents_p2_.size();
 		agents_p2_[0]->active_= true;

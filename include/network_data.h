@@ -41,6 +41,15 @@ struct UnitsEnd : public Command { // Send when all player units are dead
 	int end;
 };
 
+struct CastleLife : public Command { 
+	int player_id;
+	int new_life;
+};
+
+struct EndGame : public Command { 
+	int winner_id;
+};
+
 struct BuildData : public Command {
 	int x;
 	int y;
@@ -80,6 +89,8 @@ enum DataPackageKind {
 	kDataPackageKind_Header,
 	kDataPackageKind_Build,
 	kDataPackageKind_Unit,
+	kDataPackageKind_CastleLife,
+	kDataPackageKind_EndGame,
 	kDataPackageKind_Null
 };
 
@@ -89,9 +100,11 @@ struct DataPackage {
 
 	union {
 		Client client;
-		StartGame start;
 		CommandListHeader	header;
+		StartGame start;
+		EndGame end;
 		UnitsEnd units_end;
+		CastleLife castle_life;
 		BuildData build;
 		UnitData unit;
 	};

@@ -107,7 +107,21 @@ static DWORD socket_thread(void* game_data) {
 				data.units_end.kind_ = (int)kDataPackageKind_UnitsEnd;
 				UnitsEnd* units_end_data = static_cast<UnitsEnd*>(game->cmd_list_->commands_[0]);
 				data.units_end.end = units_end_data->end;
-				//printf("\nSend unit end package.");
+			}
+			else if (game->cmd_list_->commands_[0]->kind_ == (int)kDataPackageKind_CastleLife) {
+				data.package_kind = kDataPackageKind_CastleLife;
+				data.castle_life.sender_id = client.id;
+				data.castle_life.kind_ = (int)kDataPackageKind_CastleLife;
+				CastleLife* castle_data = static_cast<CastleLife*>(game->cmd_list_->commands_[0]);
+				data.castle_life.player_id = castle_data->player_id;
+				data.castle_life.new_life = castle_data->new_life;
+			}
+			else if (game->cmd_list_->commands_[0]->kind_ == (int)kDataPackageKind_EndGame) {
+				data.package_kind = kDataPackageKind_EndGame;
+				data.end.sender_id = client.id;
+				data.end.kind_ = (int)kDataPackageKind_EndGame;
+				EndGame* end_game = static_cast<EndGame*>(game->cmd_list_->commands_[0]);
+				data.end.winner_id = end_game->winner_id;
 			}
 
 			send(sock, (char*)&data, sizeof(DataPackage), 0);
@@ -158,7 +172,21 @@ static DWORD socket_thread(void* game_data) {
 					units_end->kind_ = data.package_kind;
 					units_end->end = data.units_end.end;
 					game->recv_cmd_list_->commands_.push_back(units_end);
-					//printf("\nRecv unit end.");
+				}
+				else if (data.package_kind == kDataPackageKind_CastleLife) {
+					CastleLife* castle_life = new CastleLife();
+					castle_life->kind_ = data.package_kind;
+					castle_life->sender_id = data.castle_life.sender_id;
+					castle_life->player_id = data.castle_life.player_id;
+					castle_life->new_life = data.castle_life.new_life;
+					game->recv_cmd_list_->commands_.push_back(castle_life);
+				}
+				else if (data.package_kind == kDataPackageKind_EndGame) {
+					EndGame* end_game = new EndGame();
+					end_game->kind_ = data.package_kind;
+					end_game->sender_id = data.end.sender_id;
+					end_game->winner_id = data.end.winner_id;
+					game->recv_cmd_list_->commands_.push_back(end_game);
 				}
 			}
 			else if (result == 0) {
