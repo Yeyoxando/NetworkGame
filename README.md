@@ -1,25 +1,25 @@
-# NetworkGame
+# Age of Towers (Multi-threaded Network Game)
 Repository for the AGCP 3rd project.
-<br>This project aims to implement a network based-game.
+<br>This project aims to implement a network based-game with multi-threading.
 
-### External own code
-Part of a 2D engine did on SDL in 2018 has been implemented to focus on the game and network aspects. Another AI project done in 2020 has also been added to manage all the units behaviour, also to not waste time in implementing this from scratch.
-Both of these implemented projects were done by me as college modules' projects in ESAT Valencia.
+## What is this game and how I play it?
+To play the game go to the 'bin' folder and execute the server, then execute both clients and the game will start.
 <br>
-<br>All the network, multi-threading and game logic code has been done specifically for this university project.
-
-### External code
-ImGUI for UI
-<br>GLM for mathemathics
-<br>SDL2/SDL image/SDL ttf
+<br>To know more about the game idea, mechanics and controls look at the GDD + TDD .pdf in the doc folder.
 
 ## Youtube demo video
 Link
 
+### External own code
+All the network, multi-threading and game logic code has been done specifically for this university project.
+<br>
+<br>
+Part of a 2D engine did on SDL in 2018 has been implemented to focus on the game and network aspects. Another AI project done in 2020 has also been added to manage all the units behaviour, also to not waste time in implementing these from scratch.
+Both of these implemented projects were done by me as college modules' projects in ESAT Valencia.
 
-## Game concept
-Simplified Age of Empires mixed with Tower Defense 
 
-## Game rules and how to play it
-
+### External code
+ImGUI for UI
+<br>GLM for mathemathics
+<br>SDL2 / SDL image / SDL ttf / SDL ImGUI
 
