@@ -22,14 +22,20 @@ public:
 	UnitManager();
 	~UnitManager();
 
-	const int kUnitFoodCost = 2;
-	const float kUnitSpawnTime = 3.0f;
+	static const int kUnitFoodCost = 2;
+	
+	static const int kUnitPeopleCost = 1;
+	static const int kUnitWoodCost = 1;
+
+	const float kUnitSpawnTime = 2.5f;
 
 	void init(int client_id);
 
 	void update(uint32_t time_step);
 
 	void drawPaths();
+
+	void buyUnit(int client_id);
 
 	Agent* createUnit(bool send_command, int client_id);
 
@@ -42,6 +48,8 @@ public:
 	void checkUnitsDisabled(bool send_command, int client_id);
 
 	void reactivateUnits(int client_id, bool first_unit);
+
+	int getNumberOfTotalUnits(int client_id);
 
 protected:
 	void initUnits();

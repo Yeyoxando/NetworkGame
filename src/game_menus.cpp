@@ -57,6 +57,8 @@ void GameMenus::initGUI() {
 		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_farm.png", &width, &height);
 
 		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_wood.png", &width, &height);
+		
+		unit_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/units/p2_unit1_button.png", &width, &height);
 	}
 	else {
 		tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_tower.png", &width, &height);
@@ -66,12 +68,15 @@ void GameMenus::initGUI() {
 		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_farm.png", &width, &height);
 
 		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_wood.png", &width, &height);
+		
+		unit_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/units/p1_unit1_button.png", &width, &height);
 	}
 
 
 
-	debug_mode_ = true;
+	debug_mode_ = false;
 	build_mode_ = false;
+	units_mode_ = false;
 
 }
 
@@ -173,6 +178,9 @@ void GameMenus::manageGUI() {
 		if (build_mode_) {
 			drawBuildingMenu();
 		}
+		else if (units_mode_) {
+			drawUnitsMenu();
+		}
 		else {
 			drawBasicMenu();
 		}
@@ -225,7 +233,7 @@ void GameMenus::drawBasicMenu() {
 		NetworkGame::instance().build_manager_->mouse_build_object_->active_ = true;
 	}
 	if (ImGui::Button("Units", ImVec2(80, 30))) {
-
+		units_mode_ = true;
 	}
 
 }
@@ -272,7 +280,23 @@ void GameMenus::drawBuildingMenu() {
 
 void GameMenus::drawUnitsMenu() {
 
+	if (ImGui::ImageButton(unit_texture_, ImVec2(100, 100))) {
+		// Buy unit
+		NetworkGame::instance().unit_manager_->buyUnit(NetworkGame::instance().client_id_);
+	}
+	ImGui::Text("Standard unit");
 
+	ImGui::SetCursorPos(ImVec2(220, 30));
+	int total_units = NetworkGame::instance().unit_manager_->getNumberOfTotalUnits(
+		NetworkGame::instance().client_id_);
+	ImGui::Text("Total units: %d", total_units);
+	ImGui::SetCursorPos(ImVec2(220, 50));
+	ImGui::Text("Expected next round food cost: %d", (total_units * 2) - 2);
+
+	ImGui::SetCursorPosY(170);
+	if (ImGui::Button("Back", ImVec2(40, 25))) {
+		units_mode_ = false;
+	}
 
 }
 

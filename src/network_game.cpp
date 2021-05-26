@@ -80,8 +80,8 @@ void NetworkGame::loadGame() {
 
 	game_started_ = false;
 
-	castle_life_p1_ = 2;
-	castle_life_p2_ = 2;
+	castle_life_p1_ = 10;
+	castle_life_p2_ = 10;
 
 	game_end_ = false;
 	winner_ = false;
@@ -297,8 +297,12 @@ void NetworkGame::updateGameWinCondition(bool send_command, int winner_id){
 
 void NetworkGame::processNetCommands(){
 
-	while (recv_cmd_list_->commands_.cbegin() != recv_cmd_list_->commands_.cend()) {
-		switch (recv_cmd_list_->commands_[0]->kind_){
+	CommandList* cmd_list = new CommandList();
+	cmd_list->commands_ = recv_cmd_list_->commands_;
+	recv_cmd_list_->commands_.clear();
+
+	while (cmd_list->commands_.cbegin() != cmd_list->commands_.cend()) {
+		switch (cmd_list->commands_[0]->kind_){
 		case kDataPackageKind_StartGame: {
 			game_started_ = true;
 			unit_manager_->reactivateUnits(client_id_, true);
@@ -313,12 +317,12 @@ void NetworkGame::processNetCommands(){
 			break;
 		}
 		case kDataPackageKind_Build: {
-			BuildData* build_data = static_cast<BuildData*>(recv_cmd_list_->commands_[0]);
+			BuildData* build_data = static_cast<BuildData*>(cmd_list->commands_[0]);
 			build_manager_->createBuilding(false, build_data->x, build_data->y, build_data->sender_id, build_data->build_kind);
 			break;
 		}
 		case kDataPackageKind_Unit: {
-			UnitData* unit_data = static_cast<UnitData*>(recv_cmd_list_->commands_[0]);
+			UnitData* unit_data = static_cast<UnitData*>(cmd_list->commands_[0]);
 			// Check if not created, create it if not, update else
 			if (unit_manager_->isUnitCreated(unit_data->sender_id, unit_data->id)) {
 				unit_manager_->updateUnit(false, *unit_data);
@@ -329,12 +333,12 @@ void NetworkGame::processNetCommands(){
 			break;
 		}
 		case kDataPackageKind_CastleLife: {
-			CastleLife* castle_life = static_cast<CastleLife*>(recv_cmd_list_->commands_[0]);
+			CastleLife* castle_life = static_cast<CastleLife*>(cmd_list->commands_[0]);
 			updateCastleLife(false, castle_life->player_id, castle_life->new_life);
 			break;
 		}
 		case kDataPackageKind_EndGame: {
-			EndGame* end_game = static_cast<EndGame*>(recv_cmd_list_->commands_[0]);
+			EndGame* end_game = static_cast<EndGame*>(cmd_list->commands_[0]);
 			updateGameWinCondition(false, end_game->winner_id);
 			break;
 		}
@@ -344,8 +348,10 @@ void NetworkGame::processNetCommands(){
 		}
 		
 		// Delete first command
-		recv_cmd_list_->commands_.erase(recv_cmd_list_->commands_.cbegin());
+		cmd_list->commands_.erase(cmd_list->commands_.cbegin());
 	}
+
+	delete cmd_list;
 
 }
 

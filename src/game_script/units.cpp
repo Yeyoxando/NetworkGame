@@ -74,6 +74,23 @@ void UnitManager::drawPaths(){
 
 // ------------------------------------------------------------------------- //
 
+void UnitManager::buyUnit(int client_id){
+
+	if (NetworkGame::instance().build_manager_->people_pieces_ >= kUnitPeopleCost &&
+			NetworkGame::instance().build_manager_->wood_pieces_ >= kUnitWoodCost) {
+
+		NetworkGame::instance().build_manager_->people_pieces_ -= kUnitPeopleCost;
+		NetworkGame::instance().build_manager_->wood_pieces_ -= kUnitWoodCost;
+
+		Agent* aux = createUnit(true, client_id);
+		aux->active_ = false;
+
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
 Agent* UnitManager::createUnit(bool send_command, int client_id){
 
 	Agent* agent = nullptr;
@@ -95,7 +112,7 @@ Agent* UnitManager::createUnit(bool send_command, int client_id){
 
 		if (send_command) {
 			UnitData* unit_data = CreateUnitData(agent->client_owner_id_, glm::vec2(520, 24),
-				agent->unit_id_, 10, true);
+				agent->unit_id_, 10, false);
 			NetworkGame::instance().unit_manager_->updateUnit(true, *unit_data);
 		}
 	}
@@ -116,7 +133,7 @@ Agent* UnitManager::createUnit(bool send_command, int client_id){
 
 		if (send_command) {
 			UnitData* unit_data = CreateUnitData(agent->client_owner_id_, glm::vec2(88, 376), 
-				agent->unit_id_, 10, true);
+				agent->unit_id_, 10, false);
 			NetworkGame::instance().unit_manager_->updateUnit(true, *unit_data);
 		}
 	}
@@ -231,8 +248,21 @@ void UnitManager::reactivateUnits(int client_id, bool first_unit){
 			return;
 		}
 		else {
-			agents_p2_[active_p2_units]->active_= true;
-			active_p2_units++;
+			if (!first_unit) {
+				if (NetworkGame::instance().build_manager_->food_pieces_ < 2) {
+					keep_spawning_ = false;
+					return;
+				}
+				else {
+					agents_p2_[active_p2_units]->active_ = true;
+					active_p2_units++;
+					NetworkGame::instance().build_manager_->food_pieces_ -= UnitManager::kUnitFoodCost;
+				}
+			}
+			else {
+				agents_p2_[active_p2_units]->active_ = true;
+				active_p2_units++;
+			}
 		}
 	}
 	else {
@@ -241,9 +271,35 @@ void UnitManager::reactivateUnits(int client_id, bool first_unit){
 			return;
 		}
 		else {
-			agents_p1_[active_p1_units]->active_ = true;
-			active_p1_units++;
+			if (!first_unit) {
+				if (NetworkGame::instance().build_manager_->food_pieces_ < 2) {
+					keep_spawning_ = false;
+					return;
+				}
+				else {
+					agents_p1_[active_p1_units]->active_ = true;
+					active_p1_units++;
+					NetworkGame::instance().build_manager_->food_pieces_ -= UnitManager::kUnitFoodCost;
+				}
+			}
+			else {
+				agents_p1_[active_p1_units]->active_ = true;
+				active_p1_units++;
+			}
 		}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+int UnitManager::getNumberOfTotalUnits(int client_id){
+
+	if (client_id == 2) {
+		return agents_p2_.size();
+	}
+	else {
+		return agents_p1_.size();	
 	}
 
 }
@@ -258,8 +314,6 @@ void UnitManager::initUnits(){
 	}
 	else {
 		Agent* aux = createUnit(true, 1);
-		aux->active_ = false;
-		aux = createUnit(true, 1);
 		aux->active_ = false;
 	}
 

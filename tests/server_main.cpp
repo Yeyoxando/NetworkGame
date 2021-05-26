@@ -16,8 +16,8 @@
 
 static int connected_clients = 0;
 bool player_disconnected = false;
-bool start_game_p1;
-bool start_game_p2;
+bool start_game_p1 = false;
+bool start_game_p2 = false;
 int recv_units_end = 0;
 bool units_end_p1 = false;
 bool units_end_p2 = false;
@@ -31,7 +31,7 @@ static DWORD client_thread(void* client_socket) {
   int result = 0;
   int client_count = 0;
   int client_thread_id = -1;
-	DataPackage data;
+  DataPackage data = {};
   std::vector<DataPackage> data_packages = std::vector<DataPackage>(0);
 
 
@@ -54,7 +54,9 @@ static DWORD client_thread(void* client_socket) {
   while (true) {
 
     lockMutex();
-    if (player_disconnected) break;
+    if (player_disconnected) {
+      break;
+    }
     unlockMutex();
 
     int receiving_cmd_count = 0;
@@ -66,7 +68,7 @@ static DWORD client_thread(void* client_socket) {
         //printf("\n Player %d: Recv %d Commands", client_thread_id, data.header.cmd_count_);
       }
 		}
-    else {
+    else if(result == 0) {
 			lockMutex();
 			client_count = --connected_clients;
 			player_disconnected = true;
@@ -75,6 +77,9 @@ static DWORD client_thread(void* client_socket) {
 			printf("\n A player has disconnected from the game.");
 			break;
 		}
+		else {
+			printf("\nData receive failed");
+    } 
 
 	  // Recv and process while not all commands have been received
     while (receiving_cmd_count > 0) {
@@ -90,7 +95,7 @@ static DWORD client_thread(void* client_socket) {
           data_packages.push_back(data);
         }
 			}
-      else {
+      else if (result == 0) {
 				lockMutex();
 				client_count = --connected_clients;
 				player_disconnected = true;
@@ -98,6 +103,9 @@ static DWORD client_thread(void* client_socket) {
 
 				printf("\n A player has disconnected from the game.");
 				break;
+			}
+			else {
+				printf("\nData receive failed");
 			}
       
       receiving_cmd_count--;
@@ -137,7 +145,6 @@ static DWORD client_thread(void* client_socket) {
       data.units_end.end = 1;
       data_packages.push_back(data);
 		}
-
     unlockMutex();
 
 		// Send first packet with number of commands
@@ -160,12 +167,11 @@ static DWORD client_thread(void* client_socket) {
 
 			data_packages.erase(data_packages.cbegin());
 		}
-
-	}
+ 	}
+	
 
 	int opponent_socket = client_count == 1 ? 1 : 0;
   send(client_sock[opponent_socket], 0, 0, 0);
-
   closesocket(sock);
 
   return 0;

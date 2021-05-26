@@ -22,6 +22,9 @@ enum BuildKind {
 	kBuildKind_House = 1,
 	kBuildKind_Farm = 2,
 	kBuildKind_WoodHouse = 3,
+	kBuildKind_Offensive_Caltrops = 4,
+	kBuildKind_Decorative_Hay = 5,
+	kBuildKind_Decorative_ChoppedTree = 6,
 };
 
 class BuildManager {

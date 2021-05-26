@@ -30,6 +30,7 @@ public:
 
 	bool debug_mode_;
 	bool build_mode_;
+	bool units_mode_;
 
 private:
 	void drawBasicMenu();
@@ -51,6 +52,8 @@ private:
 	SDL_Texture* house_texture_;
 	SDL_Texture* farm_texture_;
 	SDL_Texture* woodhouse_texture_;
+
+	SDL_Texture* unit_texture_;
 
 };
 
