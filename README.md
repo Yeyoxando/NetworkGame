@@ -2,6 +2,8 @@
 Repository for the AGCP 3rd project.
 <br>This project aims to implement a network based-game with multi-threading.
 
+<img src="https://trello-attachments.s3.amazonaws.com/5f747bf33d1087695fb61509/60aec584b0bd8064374540cb/350c5df74684fd27980c07a64909a623/image.png" width="750">
+
 ## What is this game and how I play it?
 To play the game go to the 'bin' folder and execute the server, then execute both clients and the game will start.
 <br>
