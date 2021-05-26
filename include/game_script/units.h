@@ -23,9 +23,11 @@ public:
 	~UnitManager();
 
 	const int kUnitFoodCost = 2;
-
+	const float kUnitSpawnTime = 3.0f;
 
 	void init(int client_id);
+
+	void update(uint32_t time_step);
 
 	void drawPaths();
 
@@ -39,7 +41,7 @@ public:
 
 	void checkUnitsDisabled(bool send_command, int client_id);
 
-	void reactivateUnits(int client_id);
+	void reactivateUnits(int client_id, bool first_unit);
 
 protected:
 	void initUnits();
@@ -55,6 +57,9 @@ protected:
 	std::vector<Agent*> agents_p2_;
 
 	int client_id_;
+
+	float accum_time_;
+	bool keep_spawning_;
 
 	friend class NetworkGame;
 	friend class Agent;

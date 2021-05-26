@@ -50,7 +50,7 @@ Agent::Agent(){
 
 Agent::~Agent(){
 
-  
+  delete current_path_;
 
 }
 
@@ -59,10 +59,10 @@ Agent::~Agent(){
 void Agent::update(uint32_t time_step){
 
   GameObject::update(time_step);
-  if(current_path_ != nullptr)
-    current_path_->calculateTransformedPoints();
+  /*if(current_path_ != nullptr)
+    current_path_->calculateTransformedPoints();*/
   
-  current_box_.calculateTransformedPoints();
+  //current_box_.calculateTransformedPoints();
 
   if (accum_time_ >= refresh_time_) {
     updateMind(time_step);
@@ -399,7 +399,9 @@ void Agent::set_agent_size(AgentSize agent_size){
 
 void Agent::set_deterministic_path(Path* absolute_path) {
 
-  if (absolute_path != nullptr) current_path_ = absolute_path;
+  if (absolute_path != nullptr) {
+    current_path_ = new Path(*absolute_path);
+  }
 
 }
 

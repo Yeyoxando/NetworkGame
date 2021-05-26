@@ -20,6 +20,9 @@ UnitManager::UnitManager(){
 	active_p1_units = 0;
 	active_p2_units = 0;
 
+	accum_time_ = 0.0f;
+	keep_spawning_ = false;
+
 }
 
 // ------------------------------------------------------------------------- //
@@ -39,6 +42,24 @@ void UnitManager::init(int client_id){
 
 	initPaths();
 	initUnits();
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void UnitManager::update(uint32_t time_step){
+	
+	if (NetworkGame::instance().game_end_ || !NetworkGame::instance().game_started_) return;
+
+	if (keep_spawning_) {
+		accum_time_ += time_step * 0.001f;
+
+		if (accum_time_ > kUnitSpawnTime) {
+			accum_time_ = 0.0f;
+			// New unit
+			reactivateUnits(client_id_, false);
+		}
+	}
 
 }
 
@@ -179,7 +200,6 @@ void UnitManager::checkUnitsDisabled(bool send_command, int client_id){
 			units_end->sender_id = client_id;
 			units_end->end = 1;
 			NetworkGame::instance().cmd_list_->commands_.push_back(units_end);
-			//printf("\nAdded unit end package.");
 		}
 	}
 	else {
@@ -190,7 +210,6 @@ void UnitManager::checkUnitsDisabled(bool send_command, int client_id){
 			units_end->sender_id = client_id;
 			units_end->end = 1;
 			NetworkGame::instance().cmd_list_->commands_.push_back(units_end);
-			//printf("\nAdded unit end package.");
 		}
 	}
 
@@ -198,17 +217,33 @@ void UnitManager::checkUnitsDisabled(bool send_command, int client_id){
 
 // ------------------------------------------------------------------------- //
 
-void UnitManager::reactivateUnits(int client_id){
+void UnitManager::reactivateUnits(int client_id, bool first_unit){
 
 	if (NetworkGame::instance().game_end_) return;
 
+	if (first_unit) {
+		keep_spawning_ = true;
+	}
+
 	if (client_id == 2) {
-		active_p2_units = agents_p2_.size();
-		agents_p2_[0]->active_= true;
+		if (active_p2_units >= agents_p2_.size()) {
+			keep_spawning_ = false;
+			return;
+		}
+		else {
+			agents_p2_[active_p2_units]->active_= true;
+			active_p2_units++;
+		}
 	}
 	else {
-		active_p1_units = agents_p1_.size();
-		agents_p1_[0]->active_= true;
+		if (active_p1_units >= agents_p1_.size()) {
+			keep_spawning_ = false;
+			return;
+		}
+		else {
+			agents_p1_[active_p1_units]->active_ = true;
+			active_p1_units++;
+		}
 	}
 
 }
@@ -218,10 +253,14 @@ void UnitManager::reactivateUnits(int client_id){
 void UnitManager::initUnits(){
 
 	if (client_id_ == 2) {
-		createUnit(true, 2);
+		Agent* aux = createUnit(true, 2);
+		aux->active_ = false;
 	}
 	else {
-		createUnit(true, 1);
+		Agent* aux = createUnit(true, 1);
+		aux->active_ = false;
+		aux = createUnit(true, 1);
+		aux->active_ = false;
 	}
 
 }

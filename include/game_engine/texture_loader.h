@@ -15,6 +15,7 @@
 
 #include <map>
 #include <SDL.h>
+#include <glm.hpp>
 
  // ------------------------------------------------------------------------- //
 struct SubSprite {
@@ -34,6 +35,7 @@ public:
 
 protected:
 	std::map <const char*, SDL_Texture*> textures_;
+	std::map <const char*, glm::vec2> texture_sizes_;
 	std::map <int, SubSprite> sub_sprites_;
 
 	friend class Sprite;

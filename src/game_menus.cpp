@@ -70,7 +70,7 @@ void GameMenus::initGUI() {
 
 
 
-	debug_mode_ = false;
+	debug_mode_ = true;
 	build_mode_ = false;
 
 }

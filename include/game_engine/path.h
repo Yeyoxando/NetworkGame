@@ -23,6 +23,7 @@ class Path{
  public:
   /// @brief: Path constructor
   Path();
+  Path(Path& other);
   /// @brief: Path destructor
   virtual ~Path();
 

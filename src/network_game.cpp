@@ -160,6 +160,8 @@ void NetworkGame::update(uint32_t time_step) {
 		}
 	}
 
+	unit_manager_->update(time_step);
+
 	NetworkGame::instance().scene_->update(time_step);
 
 	// Execute other player received commands
@@ -299,9 +301,7 @@ void NetworkGame::processNetCommands(){
 		switch (recv_cmd_list_->commands_[0]->kind_){
 		case kDataPackageKind_StartGame: {
 			game_started_ = true;
-
-			unit_manager_->active_p1_units = 1;
-			unit_manager_->active_p2_units = 1;
+			unit_manager_->reactivateUnits(client_id_, true);
 			break;
 		}
 		case kDataPackageKind_UnitsEnd: {
@@ -309,7 +309,7 @@ void NetworkGame::processNetCommands(){
 			// add resources
 			build_manager_->updateBuildings(client_id_);
 			// Reactivate units
-			unit_manager_->reactivateUnits(client_id_);
+			unit_manager_->reactivateUnits(client_id_, true);
 			break;
 		}
 		case kDataPackageKind_Build: {

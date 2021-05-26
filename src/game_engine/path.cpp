@@ -28,6 +28,22 @@ Path::Path() {
 
 // ------------------------------------------------------------------------- //
 
+Path::Path(Path& other){
+
+  points_ = other.points_;
+  transformed_points_ = other.transformed_points_;
+	number_points_ = other.number_points_;
+	current_index_ = 0;
+	is_ready_ = other.is_ready_;
+  direction_ = other.direction_;
+  action_ = other.action_;
+	action_loops_ = other.action_loops_;
+	current_loops_ = 0;
+
+}
+
+// ------------------------------------------------------------------------- //
+
 Path::~Path() {
 
   points_.clear();

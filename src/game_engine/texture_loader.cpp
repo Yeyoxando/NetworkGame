@@ -40,15 +40,17 @@ SDL_Texture* TextureLoader::loadTexture(const char* file_name, int* width, int* 
 
 	// Check if texture was previously loaded to not load it again
 	auto it = textures_.cbegin();
+	auto it_sizes = texture_sizes_.cbegin();
 	while (it != textures_.cend()) {
 		if (!strcmp(file_name, it->first)) {
 			//printf("\n[ _warning_ ] Texture [%s] has been loaded earlier.", file_name);
 			// Return if previously loaded
-			*width = 0; // Fix this, it needs the right size
-			*height = 0;
+			*width = it_sizes->second.x; // Fix this, it needs the right size
+			*height = it_sizes->second.y;
 			return it->second;
 		}
 		++it;
+		++it_sizes;
 	}
 
 	SDL_Surface* img = IMG_Load(file_name);
@@ -62,6 +64,7 @@ SDL_Texture* TextureLoader::loadTexture(const char* file_name, int* width, int* 
 		textures_.insert(std::pair<const char*, SDL_Texture*>(file_name, texture));
 		*width = img->w;
 		*height = img->h;
+		texture_sizes_.insert(std::pair<const char*, glm::vec2>(file_name, glm::vec2(*width, *height)));
 		return texture;
 	}
 
