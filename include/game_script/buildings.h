@@ -36,7 +36,8 @@ public:
 
 	void selectBuilding(BuildKind build_kind);
 
-	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind, bool initial_building = false);
+	void createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind, bool initial_building = false, int tile_kind_to_build = 3);
+	bool checkTileToBuild(int client_id, int tile_value, glm::vec2 pos, int tile_kind_to_check);
 
 	bool checkAndUseResourcesRequired(bool waste_resources);
 	int addResourcesEarned(int pos_x, int pos_y, int build_kind);
@@ -61,7 +62,7 @@ public:
 protected:
 	Building* createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind);
 	
-	void buildAroundTile(glm::vec2 pos, BuildKind decorative_build_kind, bool build_only_on_roads);
+	void buildAroundTile(glm::vec2 pos, BuildKind decorative_build_kind, int client_id, int tile_to_build);
 
 	Sprite* build_sprites_[4];
 
@@ -99,12 +100,9 @@ public:
 	static const int kFoodCost = 0;
 	static const int kWoodCost = 4;
 
-	static const int kRoundsToSpawnCaltrops = 2;
-
 	virtual void update(uint32_t time_step) override; // each frame
 	virtual void draw() override; // each frame
 
-	int rounds_to_drop_;
 
 protected:
 
@@ -180,10 +178,13 @@ public:
 	Caltrops();
 	~Caltrops();
 
-	int level_;
+	static const int kRoundsToSpawnCaltrops = 2;
+
+	virtual void update() override; // Only when server send a tick
+
+	int rounds_to_respawn_;
 
 protected:
-	Sprite* level_sprites_[3];
 
 };
 

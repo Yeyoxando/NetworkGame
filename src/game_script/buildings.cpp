@@ -11,6 +11,7 @@
 #include "network_game.h"
 #include "network_data.h"
 #include "game_object.h"
+#include "tilemap.h"
 
 #include <glm.hpp>
 
@@ -104,7 +105,7 @@ void BuildManager::selectBuilding(BuildKind build_kind){
 
 // ------------------------------------------------------------------------- //
 
-void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind, bool initial_building){
+void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int player_id, int build_kind, bool initial_building, int tile_kind_to_build){
 
 	// Get current tile value for the mouse position
 	int tile_value = basic_map[(pos_x / 16) +	((pos_y / 16) * 38)];
@@ -113,7 +114,7 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 
 	if (player_id == 2) { // Player 2 Building
 		// Previous comprobations for placement
-		if (tile_value == p2_build_tiles[0] && !checkForBuilding(pos, player_id)) {
+		if (checkTileToBuild(player_id, tile_value, pos, tile_kind_to_build) && !checkForBuilding(pos, player_id)) {
 			if (build_kind == kBuildKind_DefenseTower) {
 				if (NetworkGame::instance().getScene()->map_->
 						checkFourAdjacentTiles(pos, Tilemap::kTileKind_RoadBuildable) == 0) return;
@@ -139,7 +140,7 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 	}
 	else { // Player 1 Building
 		// Previous comprobations for placement
-		if (tile_value == p1_build_tiles[0] && !checkForBuilding(pos, player_id)) {
+		if (checkTileToBuild(player_id, tile_value, pos, tile_kind_to_build) && !checkForBuilding(pos, player_id)) {
 			if (build_kind == kBuildKind_DefenseTower) {
 				if (NetworkGame::instance().getScene()->map_->
 					checkFourAdjacentTiles(pos, Tilemap::kTileKind_RoadBuildable) == 0) return;
@@ -163,6 +164,40 @@ void BuildManager::createBuilding(bool send_command, int pos_x, int pos_y, int p
 			}
 		}
 	}
+
+}
+
+bool BuildManager::checkTileToBuild(int client_id, int tile_value, glm::vec2 pos, int tile_kind_to_check){
+
+	switch (tile_kind_to_check)	{
+	case Tilemap::TileKind::kTileKind_RoadBuildable: {
+		for (int i = 0; i < 6; ++i) { // 6 = number of possible road tiles
+			if (tile_value == road_tiles[i]) {
+				return true;
+			}
+		}
+		break;
+	}
+	case Tilemap::TileKind::kTileKind_Tree: {
+		return tile_value == tree_tiles[0];
+		break;
+	}
+	case Tilemap::TileKind::kTileKind_FarmGrass: {
+		if (client_id == 2) {
+			return tile_value == p2_build_tiles[0];
+		}
+		else {
+			return tile_value == p1_build_tiles[0];
+		}
+		break;
+	}
+	default: {
+		return false;
+		break;
+	}
+	}
+
+	return false;
 
 }
 
@@ -379,7 +414,7 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 		building->init(glm::vec3(pos, 0.0f));
 		Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
 		building->addComponent(sprite);
-		buildAroundTile(pos, BuildKind::kBuildKind_Offensive_Caltrops, true);
+		buildAroundTile(pos, BuildKind::kBuildKind_Offensive_Caltrops, player_id, 1);
 		break;
 	}
 	case kBuildKind_House: {
@@ -395,7 +430,7 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
 		Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
 		building->addComponent(sprite);
-		buildAroundTile(pos, BuildKind::kBuildKind_Decorative_Hay, false);
+		buildAroundTile(pos, BuildKind::kBuildKind_Decorative_Hay, player_id, 3);
 		break;
 	}
 	case kBuildKind_WoodHouse: {
@@ -403,7 +438,7 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
 		Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
 		building->addComponent(sprite);
-		buildAroundTile(pos, BuildKind::kBuildKind_Decorative_ChoppedTree, false);
+		buildAroundTile(pos, BuildKind::kBuildKind_Decorative_ChoppedTree, player_id, 2);
 		break;
 	}
 	case kBuildKind_Offensive_Caltrops: {
@@ -448,12 +483,18 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 
 // ------------------------------------------------------------------------- //
 
-void BuildManager::buildAroundTile(glm::vec2 pos, BuildKind decorative_build_kind, 
-	bool build_only_on_roads){
+void BuildManager::buildAroundTile(glm::vec2 pos, BuildKind decorative_build_kind, int client_id, int tile_to_build){
 
 	// Dont send command, the other player will create the same buildings when the parent building is created.
-
-
+	createBuilding(false, pos.x, pos.y - 16, client_id, (int)decorative_build_kind, false, tile_to_build);// Top
+	createBuilding(false, pos.x + 16, pos.y, client_id, (int)decorative_build_kind, false, tile_to_build);// Right
+	createBuilding(false, pos.x, pos.y + 16, client_id, (int)decorative_build_kind, false, tile_to_build);// Bottom
+	createBuilding(false, pos.x - 16, pos.y, client_id, (int)decorative_build_kind, false, tile_to_build);// Left
+	createBuilding(false, pos.x + 16, pos.y - 16, client_id, (int)decorative_build_kind, false, tile_to_build);// Top Right
+	createBuilding(false, pos.x - 16, pos.y - 16, client_id, (int)decorative_build_kind, false, tile_to_build);// Top Left
+	createBuilding(false, pos.x + 16, pos.y + 16, client_id, (int)decorative_build_kind, false, tile_to_build);// Bottom Right
+	createBuilding(false, pos.x - 16, pos.y + 16, client_id, (int)decorative_build_kind, false, tile_to_build);// // Bottom Left
+	
 }
 
 // ------------------------------------------------------------------------- //
@@ -478,7 +519,6 @@ Building::~Building(){
 Tower::Tower(){
 
 	build_kind_ = kBuildKind_DefenseTower;
-	rounds_to_drop_ = kRoundsToSpawnCaltrops;
 
 }
 
@@ -599,7 +639,7 @@ void Woodhouse::setResources(int new_tick_resources){
 Caltrops::Caltrops(){
 
 	build_kind_ = kBuildKind_Offensive_Caltrops;
-	level_ = 0;
+	rounds_to_respawn_ = kRoundsToSpawnCaltrops;
 	Sprite* sprite = new Sprite(*this, "../../../data/images/terrain.png", 256, 384, 16, 16);
 	addComponent(sprite);
 
@@ -608,6 +648,14 @@ Caltrops::Caltrops(){
 // ------------------------------------------------------------------------- //
 
 Caltrops::~Caltrops(){
+
+
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Caltrops::update(){
 
 
 
