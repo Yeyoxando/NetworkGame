@@ -40,11 +40,12 @@ private:
 	void drawWinMenu();
 	void drawLoseMenu();
 
-	// void drawMainMenu()
-	// void drawDisconnectMenu()
 	// void drawWaitingForConnectionMenu()
-	// void draw...Menu()
+	// void drawConnectionMenu()
+	// void drawDisconnectMenu()
 
+	void resourcesInfo();
+	void playersInfo();
 
 	ImGuiWindowFlags window_flags_;
 
@@ -54,6 +55,14 @@ private:
 	SDL_Texture* woodhouse_texture_;
 
 	SDL_Texture* unit_texture_;
+
+	SDL_Texture* winner_texture_;
+	SDL_Texture* loser_texture_;
+
+	SDL_Texture* resource_people_texture_;
+	SDL_Texture* resource_food_texture_;
+	SDL_Texture* resource_wood_texture_;
+	SDL_Texture* resource_units_texture_;
 
 };
 

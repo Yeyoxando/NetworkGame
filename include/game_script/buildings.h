@@ -171,4 +171,41 @@ protected:
 
 // ------------------------------------------------------------------------- //
 
+class Caltrops : public Building {
+public:
+	Caltrops();
+	~Caltrops();
+
+	int level_;
+
+protected:
+
+};
+
+// ------------------------------------------------------------------------- //
+
+class Hay : public Building {
+public:
+	Hay();
+	~Hay();
+
+
+protected:
+
+};
+
+// ------------------------------------------------------------------------- //
+
+class WoodChopper : public Building {
+public:
+	WoodChopper();
+	~WoodChopper();
+
+
+protected:
+
+};
+
+// ------------------------------------------------------------------------- //
+
 #endif // __BUILDINGS_H__

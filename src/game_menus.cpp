@@ -14,6 +14,22 @@
 
 // ------------------------------------------------------------------------- //
 
+static void HelpMarker(const char* desc)
+{
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+	}
+}
+
+
+// ------------------------------------------------------------------------- //
+
 GameMenus::GameMenus() {
 
 
@@ -50,27 +66,38 @@ void GameMenus::initGUI() {
 	//Load resources
 	int width, height;
 	if (NetworkGame::instance().client_id_ == 2) {
-		tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_tower.png", &width, &height);
+		tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p2_tower.png", &width, &height);
 	
-		house_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_house.png", &width, &height);
+		house_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p2_house.png", &width, &height);
 
-		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_farm.png", &width, &height);
+		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p2_farm.png", &width, &height);
 
-		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p2_wood.png", &width, &height);
+		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p2_wood.png", &width, &height);
 		
-		unit_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/units/p2_unit1_button.png", &width, &height);
+		unit_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p2_unit1_button.png", &width, &height);
+		
+		resource_units_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/resource_p2_unit.png", &width, &height);
 	}
 	else {
-		tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_tower.png", &width, &height);
+		tower_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p1_tower.png", &width, &height);
 	
-		house_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_house.png", &width, &height);
+		house_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p1_house.png", &width, &height);
 
-		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_farm.png", &width, &height);
+		farm_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p1_farm.png", &width, &height);
 
-		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/buildings/p1_wood.png", &width, &height);
+		woodhouse_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p1_wood.png", &width, &height);
 		
-		unit_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/units/p1_unit1_button.png", &width, &height);
+		unit_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/p1_unit1_button.png", &width, &height);
+		
+		resource_units_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/resource_p1_unit.png", &width, &height);
 	}
+
+	winner_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/winner.png", &width, &height);
+	loser_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/loser.png", &width, &height);
+
+	resource_people_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/resource_people.png", &width, &height);
+	resource_food_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/resource_food.png", &width, &height);
+	resource_wood_texture_ = NetworkGame::instance().tex_loader_->loadTexture("../../../data/images/UI/resource_wood.png", &width, &height);
 
 
 
@@ -160,19 +187,13 @@ void GameMenus::manageGUI() {
 	}
 	else if (NetworkGame::instance().game_end_) {
 		if (NetworkGame::instance().winner_) {
-			ImGui::Text("You have conquered the enemy territory!");
+			drawWinMenu();
 		}
 		else if(NetworkGame::instance().loser_){
-			ImGui::Text("Your enemy has destroyed your civilization...");
+			drawLoseMenu();
 		}
 
-		// Players info
-		ImGui::SetCursorPos(ImVec2(10, 210));
-		ImGui::Text("Player ID: %d", NetworkGame::instance().client_id_);
-		ImGui::SetCursorPos(ImVec2(325, 210));
-		ImGui::Text("Player 1 life: %d", NetworkGame::instance().castle_life_p1_);
-		ImGui::SetCursorPos(ImVec2(470, 210));
-		ImGui::Text("Player 2 life: %d", NetworkGame::instance().castle_life_p2_);
+		playersInfo();
 	}
 	else {
 		if (build_mode_) {
@@ -185,21 +206,8 @@ void GameMenus::manageGUI() {
 			drawBasicMenu();
 		}
 
-		// Resources
-		ImGui::SetCursorPos(ImVec2(360, 180));
-		ImGui::Text("People: %d", NetworkGame::instance().build_manager_->people_pieces_);
-		ImGui::SetCursorPos(ImVec2(450, 180));
-		ImGui::Text("Food: %d", NetworkGame::instance().build_manager_->food_pieces_);
-		ImGui::SetCursorPos(ImVec2(520, 180));
-		ImGui::Text("Wood: %d", NetworkGame::instance().build_manager_->wood_pieces_);
-
-		// Players info
-		ImGui::SetCursorPos(ImVec2(10, 210));
-		ImGui::Text("Player ID: %d", NetworkGame::instance().client_id_);
-		ImGui::SetCursorPos(ImVec2(325, 210));
-		ImGui::Text("Player 1 life: %d", NetworkGame::instance().castle_life_p1_);
-		ImGui::SetCursorPos(ImVec2(470, 210));
-		ImGui::Text("Player 2 life: %d", NetworkGame::instance().castle_life_p2_);
+		resourcesInfo();
+		playersInfo();
 	}
 		
 	ImGui::End();
@@ -246,6 +254,7 @@ void GameMenus::drawBuildingMenu() {
 		NetworkGame::instance().build_manager_->selectBuilding(kBuildKind_DefenseTower);
 	}
 	ImGui::Text("Defense Tower");
+	ImGui::SetCursorPos(ImVec2(100, 137)); HelpMarker("Drop caltrops in adjacent road tiles each two rounds. Can only be built adjacent to a road.");
 
 	ImGui::SetCursorPos(ImVec2(120, 27));
 	if (ImGui::ImageButton(house_texture_, ImVec2(100, 100))) {
@@ -253,6 +262,7 @@ void GameMenus::drawBuildingMenu() {
 	}
 	ImGui::SetCursorPos(ImVec2(120, 137));
 	ImGui::Text("House");
+	ImGui::SameLine(); HelpMarker("Add 4 people instantly when built.");
 
 	ImGui::SetCursorPos(ImVec2(232, 27));
 	if (ImGui::ImageButton(farm_texture_, ImVec2(100, 100))) {
@@ -260,6 +270,7 @@ void GameMenus::drawBuildingMenu() {
 	}
 	ImGui::SetCursorPos(ImVec2(232, 137));
 	ImGui::Text("Farm");
+	ImGui::SameLine(); HelpMarker("Convert the adjacent grass tiles into hay tiles. Add food each round.");
 
 	ImGui::SetCursorPos(ImVec2(344, 27));
 	if (ImGui::ImageButton(woodhouse_texture_, ImVec2(100, 100))) {
@@ -267,8 +278,9 @@ void GameMenus::drawBuildingMenu() {
 	}
 	ImGui::SetCursorPos(ImVec2(344, 137));
 	ImGui::Text("Wood house");
+	ImGui::SameLine(); HelpMarker("Convert the adjacent tree tiles into tree chopper tiles. Add wood each round.");
 
-	ImGui::SetCursorPosY(170);
+	ImGui::SetCursorPosY(155);
 	if (ImGui::Button("Back", ImVec2(40, 25))) {
 		build_mode_ = false;
 		NetworkGame::instance().build_manager_->mouse_build_object_->active_ = false;
@@ -285,15 +297,19 @@ void GameMenus::drawUnitsMenu() {
 		NetworkGame::instance().unit_manager_->buyUnit(NetworkGame::instance().client_id_);
 	}
 	ImGui::Text("Standard unit");
+	ImGui::SameLine(); HelpMarker("It will spawn the next turn if you have enough food.");
 
-	ImGui::SetCursorPos(ImVec2(220, 30));
 	int total_units = NetworkGame::instance().unit_manager_->getNumberOfTotalUnits(
 		NetworkGame::instance().client_id_);
-	ImGui::Text("Total units: %d", total_units);
-	ImGui::SetCursorPos(ImVec2(220, 50));
-	ImGui::Text("Expected next round food cost: %d", (total_units * 2) - 2);
 
-	ImGui::SetCursorPosY(170);
+	ImGui::SetCursorPos(ImVec2(185, 68));
+	ImGui::Image(resource_units_texture_, ImVec2(28, 32));
+	ImGui::SetCursorPos(ImVec2(220, 80));
+	ImGui::Text("%d", total_units);
+	ImGui::SetCursorPos(ImVec2(260, 80));
+	ImGui::Text("Next round food cost: %d", (total_units * 2) - 2);
+
+	ImGui::SetCursorPosY(155);
 	if (ImGui::Button("Back", ImVec2(40, 25))) {
 		units_mode_ = false;
 	}
@@ -304,7 +320,10 @@ void GameMenus::drawUnitsMenu() {
 
 void GameMenus::drawWinMenu(){
 
+	ImGui::Text("You have conquered the enemy territory!");
 
+	ImGui::SetCursorPos(ImVec2(120, 84));
+	ImGui::Image(winner_texture_, ImVec2(368, 72));
 
 }
 
@@ -312,8 +331,48 @@ void GameMenus::drawWinMenu(){
 
 void GameMenus::drawLoseMenu(){
 
+	ImGui::Text("Your enemy has destroyed your civilization...");
 
+	ImGui::SetCursorPos(ImVec2(120, 84));
+	ImGui::Image(loser_texture_, ImVec2(368, 72));
 
 }
 
+// ------------------------------------------------------------------------- //
+
+void GameMenus::resourcesInfo(){
+
+	// People
+	ImGui::SetCursorPos(ImVec2(150, 200));
+	ImGui::Image(resource_people_texture_, ImVec2(28, 32));
+	ImGui::SetCursorPos(ImVec2(180, 210));
+	ImGui::Text("%d", NetworkGame::instance().build_manager_->people_pieces_);
+
+	// Food
+	ImGui::SetCursorPos(ImVec2(220, 200));
+	ImGui::Image(resource_food_texture_, ImVec2(28, 32));
+	ImGui::SetCursorPos(ImVec2(250, 210));
+	ImGui::Text("%d", NetworkGame::instance().build_manager_->food_pieces_);
+	
+	// Wood
+	ImGui::SetCursorPos(ImVec2(290, 200));
+	ImGui::Image(resource_wood_texture_, ImVec2(28, 32));
+	ImGui::SetCursorPos(ImVec2(325, 210));
+	ImGui::Text("%d", NetworkGame::instance().build_manager_->wood_pieces_);
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void GameMenus::playersInfo(){
+
+	ImGui::SetCursorPos(ImVec2(10, 210));
+	ImGui::Text("Player ID: %d", NetworkGame::instance().client_id_);
+
+	ImGui::SetCursorPos(ImVec2(400, 210));
+	ImGui::Text("P1 life: %d", NetworkGame::instance().castle_life_p1_);
+	ImGui::SetCursorPos(ImVec2(510, 210));
+	ImGui::Text("P2 life: %d", NetworkGame::instance().castle_life_p2_);
+
+}
 // ------------------------------------------------------------------------- //
