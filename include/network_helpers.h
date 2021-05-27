@@ -51,13 +51,13 @@ static int initSocket(SOCKET* sock) {
 		return EXIT_FAILURE;
 	}
 
-	/*
+	
 	u_long iMode = 0;
 	int iResult = ioctlsocket(*sock, FIONBIO, &iMode);
 	if (iResult != NO_ERROR){
 		printf("ioctlsocket failed with error: %ld\n", iResult);
 	}
-	*/
+	
 
 	return 0;
 }
