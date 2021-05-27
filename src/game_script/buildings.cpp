@@ -10,6 +10,7 @@
 #include "network_game_maps.h"
 #include "network_game.h"
 #include "network_data.h"
+#include "agent.h"
 #include "game_object.h"
 #include "tilemap.h"
 
@@ -393,10 +394,55 @@ void BuildManager::updateBuildings(int client_id){
 		for (int i = 0; i < p2_buildings.size(); ++i) {
 			p2_buildings[i]->update(); // virtual override on building classes
 		}
+		for (int j = 0; j < p1_caltrops.size(); ++j) {
+			p1_caltrops[j]->update();
+		}
 	}
 	else {
 		for (int i = 0; i < p1_buildings.size(); ++i) {
 			p1_buildings[i]->update(); // virtual override on building classes
+		}
+		for (int j = 0; j < p2_caltrops.size(); ++j) {
+			p2_caltrops[j]->update();
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void BuildManager::updateCaltrops(int client_id){
+
+	// Update enemy caltrops
+	if (client_id == 2) {
+		for (int i = 0; i < p1_caltrops.size(); ++i) {
+			p1_caltrops[i]->manualFrameUpdate();
+		}
+	}
+	else {
+		for (int i = 0; i < p2_caltrops.size(); ++i) {
+			p2_caltrops[i]->manualFrameUpdate();
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void BuildManager::updateCaltrop(int client_id, int caltrop_id, int active){
+
+	if (client_id == 2) {
+		for (int i = 0; i < p1_caltrops.size(); ++i) {
+			if (p1_caltrops[i]->build_id_ == caltrop_id) {
+				p1_caltrops[i]->active_ = (bool)active;
+			}
+		}
+	}
+	else{
+		for (int i = 0; i < p2_caltrops.size(); ++i) {
+			if (p2_caltrops[i]->build_id_ == caltrop_id) {
+				p2_caltrops[i]->active_ = (bool)active;
+			}
 		}
 	}
 
@@ -444,6 +490,15 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 	case kBuildKind_Offensive_Caltrops: {
 		building = new Caltrops();
 		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+		Caltrops* aux = static_cast<Caltrops*>(building);
+		aux->setCollisionBox();
+
+		if (player_id == 2) {
+			p2_caltrops.push_back(aux);
+		}
+		else {
+			p1_caltrops.push_back(aux);
+		}
 
 		break;
 	}
@@ -640,8 +695,9 @@ Caltrops::Caltrops(){
 
 	build_kind_ = kBuildKind_Offensive_Caltrops;
 	rounds_to_respawn_ = kRoundsToSpawnCaltrops;
-	Sprite* sprite = new Sprite(*this, "../../../data/images/terrain.png", 256, 384, 16, 16);
+	Sprite* sprite = new Sprite(*this, "../../../data/images/terrain.png", 272, 384, 16, 16);
 	addComponent(sprite);
+
 
 }
 
@@ -657,7 +713,92 @@ Caltrops::~Caltrops(){
 
 void Caltrops::update(){
 
+	// When the round finishes subtract 1 to the respawn rounds, if it reaches 0 it will reactivate and 
+	if (!active_) {
+		rounds_to_respawn_--;
 
+		if (rounds_to_respawn_ <= 0) {
+			active_ = true;
+			// send a command
+			CaltropState* caltrop = new CaltropState();
+			caltrop->sender_id = client_owner_id_;
+			caltrop->kind_ = (int)kDataPackageKind_CaltropState;
+			caltrop->caltrop_id = build_id_;
+			caltrop->active = (int)true;
+			NetworkGame::instance().cmd_list_->commands_.push_back(caltrop);
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Caltrops::draw(){
+
+	GameObject::draw();
+
+	if (NetworkGame::instance().game_menus_->debug_mode_) {
+		collision_box_.drawDebug(glm::vec4(255, 255, 255, 255));
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Caltrops::manualFrameUpdate(){
+
+	if (!active_) return;
+
+	// Players update the caltrops of the enemies to damage their units
+	if (client_owner_id_ == 2) {
+		//Check p1 units
+		std::vector<Agent*>& agents = NetworkGame::instance().unit_manager_->agents_p1_;
+		for (int i = 0; i < agents.size(); ++i) {
+			if (collision_box_.isPositionInside(glm::vec2(agents[i]->transform_.position_.x + 6.0f, agents[i]->transform_.position_.y + 6.0f))){
+				rounds_to_respawn_ = kRoundsToSpawnCaltrops;
+				active_ = false;
+				// Hit/kill unit
+				agents[i]->hit_points_--;
+				// Send commands
+				CaltropState* caltrop = new CaltropState();
+				caltrop->sender_id = 2;
+				caltrop->kind_ = (int)kDataPackageKind_CaltropState;
+				caltrop->caltrop_id = build_id_;
+				caltrop->active = (int)false;
+				NetworkGame::instance().cmd_list_->commands_.push_back(caltrop);
+			}
+		}
+	}
+	else {
+		// Check p2 units
+		std::vector<Agent*>& agents = NetworkGame::instance().unit_manager_->agents_p2_;
+		for (int i = 0; i < agents.size(); ++i) {
+			if (collision_box_.isPositionInside(glm::vec2(agents[i]->transform_.position_.x + 6.0f, agents[i]->transform_.position_.y + 6.0f))) {
+				rounds_to_respawn_ = kRoundsToSpawnCaltrops;
+				active_ = false;
+				// Hit/kill unit
+				agents[i]->hit_points_--;
+				// Send commands
+				CaltropState* caltrop = new CaltropState();
+				caltrop->sender_id = 1;
+				caltrop->kind_ = (int)kDataPackageKind_CaltropState;
+				caltrop->caltrop_id = build_id_;
+				caltrop->active = (int)false;
+				NetworkGame::instance().cmd_list_->commands_.push_back(caltrop);
+			}
+		}
+	}
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void Caltrops::setCollisionBox(){
+
+	collision_box_.set_position(glm::vec2(transform_.position_.x, transform_.position_.y));
+	collision_box_.set_size(glm::vec2(18, 18));
+	collision_box_.updatePoints();
+	collision_box_.calculateTransformedPoints();
 
 }
 

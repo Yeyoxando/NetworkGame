@@ -268,6 +268,7 @@ public:
   // NETWORK GAME
   int client_owner_id_;
   int unit_id_;
+  int hit_points_;
 
 };
 

@@ -18,7 +18,8 @@ static int connected_clients = 0;
 bool player_disconnected = false;
 bool start_game_p1 = false;
 bool start_game_p2 = false;
-int recv_units_end = 0;
+bool recv_units_end_p1 = false;
+bool recv_units_end_p2 = false;
 bool units_end_p1 = false;
 bool units_end_p2 = false;
 static SOCKET client_sock[2];
@@ -94,7 +95,12 @@ static DWORD client_thread(void* client_socket) {
 				// Get  command and send to the other player
         if (data.package_kind == kDataPackageKind_UnitsEnd) {
           lockMutex();
-          recv_units_end++;
+          if (data.units_end.sender_id == 2) {
+            recv_units_end_p2 = true;
+          }
+          else {
+            recv_units_end_p1 = true;          
+          }
           unlockMutex();
         }
         else {
@@ -140,8 +146,9 @@ static DWORD client_thread(void* client_socket) {
 		}
 
     // UNITS END
-    if (recv_units_end == 2) {
-      recv_units_end = 0;
+    if (recv_units_end_p1 && recv_units_end_p2) {
+      recv_units_end_p1 = false;
+      recv_units_end_p2 = false;
       units_end_p1 = true;
       units_end_p2 = true;
     }

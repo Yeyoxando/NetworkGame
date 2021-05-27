@@ -8,6 +8,8 @@
 // ------------------------------------------------------------------------- //
 
 #include "units.h"
+
+#include "agent.h"
 #include "network_game.h"
 
 // ------------------------------------------------------------------------- //
@@ -182,14 +184,6 @@ void UnitManager::updateUnit(bool send_command, UnitData& data){
 
 // ------------------------------------------------------------------------- //
 
-void UnitManager::killUnit(bool send_command, UnitData& data){
-
-
-
-}
-
-// ------------------------------------------------------------------------- //
-
 bool UnitManager::isUnitCreated(int player_id, int unit_id){
 
 	if (player_id == 2) {
@@ -257,12 +251,14 @@ void UnitManager::reactivateUnits(int client_id, bool first_unit){
 				}
 				else {
 					agents_p2_[active_p2_units]->active_ = true;
+					agents_p2_[active_p2_units]->hit_points_ = UnitManager::kUnitHitPoints;
 					active_p2_units++;
 					NetworkGame::instance().build_manager_->food_pieces_ -= UnitManager::kUnitFoodCost;
 				}
 			}
 			else {
 				agents_p2_[active_p2_units]->active_ = true;
+				agents_p2_[active_p2_units]->hit_points_ = UnitManager::kUnitHitPoints;
 				active_p2_units++;
 			}
 		}
@@ -280,12 +276,14 @@ void UnitManager::reactivateUnits(int client_id, bool first_unit){
 				}
 				else {
 					agents_p1_[active_p1_units]->active_ = true;
+					agents_p1_[active_p1_units]->hit_points_ = UnitManager::kUnitHitPoints;
 					active_p1_units++;
 					NetworkGame::instance().build_manager_->food_pieces_ -= UnitManager::kUnitFoodCost;
 				}
 			}
 			else {
 				agents_p1_[active_p1_units]->active_ = true;
+				agents_p2_[active_p1_units]->hit_points_ = UnitManager::kUnitHitPoints;
 				active_p1_units++;
 			}
 		}

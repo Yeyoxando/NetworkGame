@@ -64,6 +64,11 @@ struct UnitData : public Command {
 	int hit_points;
 };
 
+struct CaltropState : public Command {
+	int caltrop_id;
+	int active;
+};
+
 // ------------------------------------------------------------------------- //
 
 // Used to store the commands and execute them later when the net thread is not running
@@ -91,6 +96,7 @@ enum DataPackageKind {
 	kDataPackageKind_Unit,
 	kDataPackageKind_CastleLife,
 	kDataPackageKind_EndGame,
+	kDataPackageKind_CaltropState,
 	kDataPackageKind_Null
 };
 
@@ -107,6 +113,7 @@ struct DataPackage {
 		CastleLife castle_life;
 		BuildData build;
 		UnitData unit;
+		CaltropState caltrop;
 	};
 
 };

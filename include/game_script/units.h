@@ -10,17 +10,20 @@
 // ------------------------------------------------------------------------- //
 
 #include "path.h"
-#include "agent.h"
 #include "network_data.h"
 
 #include <vector>
 
 // ------------------------------------------------------------------------- //
 
+class Agent;
+
 class UnitManager {
 public:
 	UnitManager();
 	~UnitManager();
+
+	static const int kUnitHitPoints = 4;
 
 	static const int kUnitFoodCost = 2;
 	
@@ -40,8 +43,6 @@ public:
 	Agent* createUnit(bool send_command, int client_id);
 
 	void updateUnit(bool send_command, UnitData& data);
-
-	void killUnit(bool send_command, UnitData& data);
 
 	bool isUnitCreated(int player_id, int unit_id);
 
@@ -71,6 +72,7 @@ protected:
 
 	friend class NetworkGame;
 	friend class Agent;
+	friend class Caltrops;
 
 };
 

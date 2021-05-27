@@ -114,13 +114,13 @@ class Path{
   /// @result: true if given point is equal to Path last point
   bool is_last(glm::vec2 point) const;
 
+	/// @brief: Current index of traveling Path
+	int32_t current_index_;
  private:
   /// @brief: Direction of Path
   Direction direction_;
   /// @brief: Action of Path
   Action action_;
-  /// @brief: Current index of traveling Path
-  int32_t current_index_;
   /// @brief: Number of repetitions Path should make
   uint32_t action_loops_;
   /// @brief: Current number of repetitions performed

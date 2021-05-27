@@ -128,6 +128,14 @@ static DWORD socket_thread(void* game_data) {
 				EndGame* end_game = static_cast<EndGame*>(game->cmd_list_->commands_[0]);
 				data.end.winner_id = end_game->winner_id;
 			}
+			else if (game->cmd_list_->commands_[0]->kind_ == (int)kDataPackageKind_CaltropState) {
+				data.package_kind = kDataPackageKind_CaltropState;
+				data.caltrop.sender_id = client.id;
+				data.caltrop.kind_ = (int)kDataPackageKind_CaltropState;
+				CaltropState* caltrop = static_cast<CaltropState*>(game->cmd_list_->commands_[0]);
+				data.caltrop.caltrop_id = caltrop->caltrop_id;
+				data.caltrop.active = caltrop->active;
+			}
 
 			send(sock, (char*)&data, sizeof(DataPackage), 0);
 
@@ -196,6 +204,14 @@ static DWORD socket_thread(void* game_data) {
 					end_game->sender_id = data.end.sender_id;
 					end_game->winner_id = data.end.winner_id;
 					game->recv_cmd_list_->commands_.push_back(end_game);
+				}
+				else if (data.package_kind == kDataPackageKind_CaltropState) {
+					CaltropState* caltrop = new CaltropState();
+					caltrop->kind_ = data.package_kind;
+					caltrop->sender_id = data.caltrop.sender_id;
+					caltrop->caltrop_id = data.caltrop.caltrop_id;
+					caltrop->active = data.caltrop.active;
+					game->recv_cmd_list_->commands_.push_back(caltrop);
 				}
 			}
 			else if (result == 0) {

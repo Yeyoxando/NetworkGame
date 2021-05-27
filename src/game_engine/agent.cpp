@@ -8,6 +8,7 @@
 
 #include "agent.h"
 #include "network_game.h"
+#include "game_script/units.h"
 
 #include <glm.hpp>
 
@@ -43,6 +44,8 @@ Agent::Agent(){
 
   client_owner_id_ = 0;
   unit_id_ = 0;
+
+  hit_points_ = UnitManager::kUnitHitPoints;
 
 }
 
@@ -503,11 +506,27 @@ void Agent::MOV_Deterministic(uint32_t time_step) {
     started_movement_ = true;
   }
 
+  if (hit_points_ <= 0) {
+    if (client_owner_id_ == 2) {
+			NetworkGame::instance().unit_manager_->active_p2_units--;
+    }
+    else {
+			NetworkGame::instance().unit_manager_->active_p1_units--; 
+		}
+		transform_.position_ = glm::vec3(current_path_->first_point(), 0);
+		target_ = current_path_->at_point(1);
+		current_path_->current_index_ = 0;
+    active_ = false;
+  }
+
   glm::vec2 pos = glm::vec2(transform_.position_.x, transform_.position_.y);
 
 	//Send command
-  UnitData* unit_data = CreateUnitData(client_owner_id_, pos, unit_id_, 10, active_);
+  UnitData* unit_data = CreateUnitData(client_owner_id_, pos, unit_id_, hit_points_, active_);
   NetworkGame::instance().unit_manager_->updateUnit(true, *unit_data);
+  if (hit_points_ <= 0) {
+    NetworkGame::instance().unit_manager_->checkUnitsDisabled(true, client_owner_id_);
+  }
 
   // Calculate movement
   if (!current_path_->is_ready()) {

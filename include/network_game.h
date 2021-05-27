@@ -102,6 +102,7 @@ public:
 	friend class Box;
 	friend class Farm;
 	friend class Woodhouse;
+	friend class Caltrops;
 
 };
 

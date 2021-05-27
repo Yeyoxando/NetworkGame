@@ -12,10 +12,12 @@
 #include <vector>
 
 #include "game_object.h"
+#include "box.h"
 
 // ------------------------------------------------------------------------- //
 
 class Building;
+class Caltrops;
 
 enum BuildKind {
 	kBuildKind_DefenseTower = 0,
@@ -48,9 +50,14 @@ public:
 	Sprite* getBuildingSprite(GameObject& go, BuildKind build_kind, int player_id);
 
 	void updateBuildings(int client_id);// add the resources for all buildings
+	void updateCaltrops(int client_id);
+
+	void updateCaltrop(int client_id, int caltrop_id, int active);
 
 	std::vector<Building*> p1_buildings;
+	std::vector<Caltrops*> p1_caltrops;
 	std::vector<Building*> p2_buildings;
+	std::vector<Caltrops*> p2_caltrops;
 
 	GameObject* mouse_build_object_;
 	BuildKind selected_build_;
@@ -181,8 +188,14 @@ public:
 	static const int kRoundsToSpawnCaltrops = 2;
 
 	virtual void update() override; // Only when server send a tick
+	virtual void draw() override; // each frame
+
+	void manualFrameUpdate(); //Called manually only for the needed ones on each client
+
+	void setCollisionBox();
 
 	int rounds_to_respawn_;
+	Box collision_box_;
 
 protected:
 

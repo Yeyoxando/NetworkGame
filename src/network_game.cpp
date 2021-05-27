@@ -165,6 +165,7 @@ void NetworkGame::update(uint32_t time_step) {
 		}
 	}
 
+	build_manager_->updateCaltrops(client_id_);
 	unit_manager_->update(time_step);
 
 	NetworkGame::instance().scene_->update(time_step);
@@ -345,6 +346,11 @@ void NetworkGame::processNetCommands(){
 		case kDataPackageKind_EndGame: {
 			EndGame* end_game = static_cast<EndGame*>(cmd_list->commands_[0]);
 			updateGameWinCondition(false, end_game->winner_id);
+			break;
+		}
+		case kDataPackageKind_CaltropState: {
+			CaltropState* caltrop = static_cast<CaltropState*>(cmd_list->commands_[0]);
+			build_manager_->updateCaltrop(caltrop->sender_id, caltrop->caltrop_id, caltrop->active);
 			break;
 		}
 		default: {
