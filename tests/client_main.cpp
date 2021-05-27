@@ -40,7 +40,12 @@ static DWORD socket_thread(void* game_data) {
 	if (initSocket(&sock) != 0) return EXIT_FAILURE;
 
 	//Server ip setting 
-	server_ip = SetIP("127.0.0.1", 50000);
+	if (game->custom_ip_) {
+		server_ip = SetIP(game->ip_, 50000); // User given IP		
+	}
+	else {
+		server_ip = SetIP("127.0.0.1", 50000); // Local host
+	}
 
 	//Connect client to server ip
 	if (connectSocket(&sock, (SOCKADDR*)&server_ip, ip_length) != 0) return EXIT_FAILURE;
@@ -146,6 +151,10 @@ static DWORD socket_thread(void* game_data) {
 			unlockMutex();
 			break;
 		}
+		else {
+			//printf("\nData receive failed cmd header.");
+			game->disconnected_player_ = true;
+		}
 
 		// Recv and process while not all commands have been received
 		while (receiving_cmd_count > 0) {
@@ -196,6 +205,10 @@ static DWORD socket_thread(void* game_data) {
 				unlockMutex();
 				break;
 			}
+			else {
+				//printf("\nData receive failed cmd list.");
+				game->disconnected_player_ = true;
+			}
 
 			receiving_cmd_count--;
 		}
@@ -220,12 +233,18 @@ int main(int argc, char* argv[]) {
 	uint32_t frame_start;
 	int frame_time;
 
+	
+
 	//Winsock variables
 	WSADATA wsa;
 
   // Game
   NetworkGame* game = &NetworkGame::instance();
-
+	if (argc > 1) {
+		game->custom_ip_ = true;
+		game->ip_ = argv[1];
+		printf("\n Custom IP set: %s", argv[1]);
+	}
 
 	//Winsock start
 	if (startWinsock(&wsa) != 0) return EXIT_FAILURE;

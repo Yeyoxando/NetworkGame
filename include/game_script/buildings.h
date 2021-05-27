@@ -42,7 +42,7 @@ public:
 	int addResourcesEarned(int pos_x, int pos_y, int build_kind);
 
 	bool checkForBuilding(glm::vec2 build_pos, int player_id);
-	bool checkForSurroundingBuildings(glm::vec2 build_pos, int player_id);
+	int checkForSurroundingBuildings(glm::vec2 build_pos, int player_id);
 
 	Sprite* getBuildingSprite(GameObject& go, BuildKind build_kind, int player_id);
 
@@ -60,6 +60,8 @@ public:
 
 protected:
 	Building* createBuildingGameObject(int player_id, glm::vec2 pos, int build_kind);
+	
+	void buildAroundTile(glm::vec2 pos, BuildKind decorative_build_kind, bool build_only_on_roads);
 
 	Sprite* build_sprites_[4];
 
@@ -97,10 +99,12 @@ public:
 	static const int kFoodCost = 0;
 	static const int kWoodCost = 4;
 
+	static const int kRoundsToSpawnCaltrops = 2;
+
 	virtual void update(uint32_t time_step) override; // each frame
 	virtual void draw() override; // each frame
 
-	int range_;
+	int rounds_to_drop_;
 
 protected:
 
@@ -179,6 +183,7 @@ public:
 	int level_;
 
 protected:
+	Sprite* level_sprites_[3];
 
 };
 
@@ -196,10 +201,10 @@ protected:
 
 // ------------------------------------------------------------------------- //
 
-class WoodChopper : public Building {
+class ChoppedTree : public Building {
 public:
-	WoodChopper();
-	~WoodChopper();
+	ChoppedTree();
+	~ChoppedTree();
 
 
 protected:

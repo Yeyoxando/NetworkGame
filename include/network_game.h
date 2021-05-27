@@ -46,6 +46,11 @@ public:
 	bool winner_;
 	bool loser_;
 
+	bool disconnected_player_;
+
+	bool custom_ip_;
+	char* ip_;
+
 	void updateCastleLife(bool send_command, int player_id, int castle_life);
 	void updateGameWinCondition(bool send_command, int winner_id);
 

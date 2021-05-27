@@ -206,7 +206,7 @@ bool BuildManager::checkAndUseResourcesRequired(bool waste_resources){
 		break;
 	}
 	default: {
-		return false;
+		return true;
 		break;
 	}
 	}
@@ -290,9 +290,11 @@ bool BuildManager::checkForBuilding(glm::vec2 build_pos, int player_id){
 
 // ------------------------------------------------------------------------- //
 
-bool BuildManager::checkForSurroundingBuildings(glm::vec2 build_pos, int player_id){
+int BuildManager::checkForSurroundingBuildings(glm::vec2 build_pos, int player_id){
 
-	return false;
+
+
+	return 0;
 
 }
 
@@ -375,23 +377,49 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 	case kBuildKind_DefenseTower: {
 		building = new Tower();
 		building->init(glm::vec3(pos, 0.0f));
-		
+		Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
+		building->addComponent(sprite);
+		buildAroundTile(pos, BuildKind::kBuildKind_Offensive_Caltrops, true);
 		break;
 	}
 	case kBuildKind_House: {
 		building = new House();
 		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+		Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
+		building->addComponent(sprite);
 
 		break;
 	}
 	case kBuildKind_Farm: {
 		building = new Farm();
 		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
-
+		Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
+		building->addComponent(sprite);
+		buildAroundTile(pos, BuildKind::kBuildKind_Decorative_Hay, false);
 		break;
 	}
 	case kBuildKind_WoodHouse: {
 		building = new Woodhouse();
+		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+		Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
+		building->addComponent(sprite);
+		buildAroundTile(pos, BuildKind::kBuildKind_Decorative_ChoppedTree, false);
+		break;
+	}
+	case kBuildKind_Offensive_Caltrops: {
+		building = new Caltrops();
+		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+
+		break;
+	}
+	case kBuildKind_Decorative_Hay: {
+		building = new Hay();
+		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
+
+		break;
+	}
+	case kBuildKind_Decorative_ChoppedTree: {
+		building = new ChoppedTree();
 		building->init(glm::vec3(pos.x, pos.y + 8.0f, 0.0f));
 
 		break;
@@ -401,8 +429,6 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 	}
 	}
 
-	Sprite* sprite = getBuildingSprite(*building, (BuildKind)build_kind, player_id);
-	building->addComponent(sprite);
 	building->client_owner_id_ = player_id;
 
 	if (player_id == 2) {
@@ -417,6 +443,16 @@ Building* BuildManager::createBuildingGameObject(int player_id, glm::vec2 pos, i
 	NetworkGame::instance().getScene()->addGameObject(building);
 
 	return building;
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void BuildManager::buildAroundTile(glm::vec2 pos, BuildKind decorative_build_kind, 
+	bool build_only_on_roads){
+
+	// Dont send command, the other player will create the same buildings when the parent building is created.
+
 
 }
 
@@ -442,7 +478,7 @@ Building::~Building(){
 Tower::Tower(){
 
 	build_kind_ = kBuildKind_DefenseTower;
-	range_ = 1;
+	rounds_to_drop_ = kRoundsToSpawnCaltrops;
 
 }
 
@@ -562,7 +598,10 @@ void Woodhouse::setResources(int new_tick_resources){
 
 Caltrops::Caltrops(){
 
-
+	build_kind_ = kBuildKind_Offensive_Caltrops;
+	level_ = 0;
+	Sprite* sprite = new Sprite(*this, "../../../data/images/terrain.png", 256, 384, 16, 16);
+	addComponent(sprite);
 
 }
 
@@ -578,7 +617,9 @@ Caltrops::~Caltrops(){
 
 Hay::Hay(){
 
-
+	build_kind_ = kBuildKind_Decorative_Hay;
+	Sprite* sprite = new Sprite(*this, "../../../data/images/terrain.png", 176, 464, 16, 16);
+	addComponent(sprite);
 
 }
 
@@ -592,15 +633,17 @@ Hay::~Hay(){
 
 // ------------------------------------------------------------------------- //
 
-WoodChopper::WoodChopper(){
+ChoppedTree::ChoppedTree() {
 
-
+	build_kind_ = kBuildKind_Decorative_ChoppedTree;
+	Sprite* sprite = new Sprite(*this, "../../../data/images/terrain.png", 272, 464, 16, 16);
+	addComponent(sprite);
 
 }
 
 // ------------------------------------------------------------------------- //
 
-WoodChopper::~WoodChopper(){
+ChoppedTree::~ChoppedTree(){
 
 
 

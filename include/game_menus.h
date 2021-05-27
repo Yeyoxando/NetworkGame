@@ -40,9 +40,10 @@ private:
 	void drawWinMenu();
 	void drawLoseMenu();
 
+	void drawDisconnectionMenu();
+
 	// void drawWaitingForConnectionMenu()
-	// void drawConnectionMenu()
-	// void drawDisconnectMenu()
+	void drawConnectionMenu();
 
 	void resourcesInfo();
 	void playersInfo();

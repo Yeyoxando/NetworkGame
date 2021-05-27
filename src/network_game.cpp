@@ -23,6 +23,9 @@ NetworkGame::NetworkGame(){
 
 	client_id_ = 0;
 
+	custom_ip_ = false;
+	ip_ = "\0";
+
 }
 
 // ------------------------------------------------------------------------- //
@@ -86,6 +89,8 @@ void NetworkGame::loadGame() {
 	game_end_ = false;
 	winner_ = false;
 	loser_ = false;
+
+	disconnected_player_ = false;
 
 }
 

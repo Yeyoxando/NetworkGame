@@ -104,6 +104,7 @@ Agent* UnitManager::createUnit(bool send_command, int client_id){
 		agent->set_deterministic_path(p2_path_);
 		agent->client_owner_id_ = 2;
 		agent->unit_id_ = agents_p2_.size();
+		agent->active_ = false;
 
 		Sprite* p2_sprite = new Sprite(*agent, "../../../data/images/units/p2_unit1.png");
 		agent->addComponent(p2_sprite);
@@ -125,6 +126,7 @@ Agent* UnitManager::createUnit(bool send_command, int client_id){
 		agent->set_deterministic_path(p1_path_);
 		agent->client_owner_id_ = 1;
 		agent->unit_id_ = agents_p1_.size();
+		agent->active_ = false;
 
 		Sprite* p1_sprite = new Sprite(*agent, "../../../data/images/units/p1_unit1.png");
 		agent->addComponent(p1_sprite);

@@ -78,7 +78,13 @@ static DWORD client_thread(void* client_socket) {
 			break;
 		}
 		else {
-			printf("\nData receive failed");
+		  lockMutex();
+			client_count = --connected_clients;
+			player_disconnected = true;
+			unlockMutex();
+
+			printf("\nData receive failed cmd header. Disconnecting other players from the game");
+			break;
     } 
 
 	  // Recv and process while not all commands have been received
@@ -105,7 +111,13 @@ static DWORD client_thread(void* client_socket) {
 				break;
 			}
 			else {
-				printf("\nData receive failed");
+				lockMutex();
+				client_count = --connected_clients;
+				player_disconnected = true;
+				unlockMutex();
+
+				printf("\nData receive failed cmd list. Disconnecting other players from the game");
+        break;
 			}
       
       receiving_cmd_count--;

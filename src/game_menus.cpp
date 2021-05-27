@@ -195,6 +195,9 @@ void GameMenus::manageGUI() {
 
 		playersInfo();
 	}
+	else if (NetworkGame::instance().disconnected_player_){
+		drawDisconnectionMenu();
+	}
 	else {
 		if (build_mode_) {
 			drawBuildingMenu();
@@ -335,6 +338,14 @@ void GameMenus::drawLoseMenu(){
 
 	ImGui::SetCursorPos(ImVec2(120, 84));
 	ImGui::Image(loser_texture_, ImVec2(368, 72));
+
+}
+
+// ------------------------------------------------------------------------- //
+
+void GameMenus::drawDisconnectionMenu(){
+
+	ImGui::Text("Your enemy has disconnected or dropped from the game!!! \nThe server was closed automatically. \n\nClose the game and connect to a server again to keep playing.");
 
 }
 
