@@ -2,7 +2,7 @@
 Repository for the AGCP 3rd project.
 <br>This project aims to implement a network based-game with multi-threading.
 
-<img src="https://trello-attachments.s3.amazonaws.com/5f747bf33d1087695fb61509/60aec584b0bd8064374540cb/350c5df74684fd27980c07a64909a623/image.png" width="750">
+<img src="https://trello-attachments.s3.amazonaws.com/5f747bf33d1087695fb61509/60aec584b0bd8064374540cb/afe9b41d773400c84543c6eb516e50e8/Captura_de_pantalla_2021-05-27_145710.jpg" width="850">
 
 ## What is this game and how I play it?
 To play the game go to the 'bin' folder and execute the server, then execute both clients and the game will start.
@@ -12,7 +12,7 @@ To play the game go to the 'bin' folder and execute the server, then execute bot
 <br>To know more about the game idea, mechanics and controls look at the GDD + TDD .pdf in the 'doc' folder.
 
 ## Youtube demo video
-Link
+https://youtu.be/NolwQ4UhtMk
 
 ## Dependencies
 ### External own code
