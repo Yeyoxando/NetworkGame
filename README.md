@@ -2,6 +2,9 @@
 Repository for the AGCP 3rd project.
 <br>This project aims to implement a network based-game with multi-threading.
 
+<br>Some parts of the code have been rushed for the university deadline. Different parts of the code are spread in different places but they should be part of the 2D engine to run the game things in top of it.
+<br> I've achieved a mark of 100.0 for this project, so for the moment I'm not going to fix any of these problems.
+
 <img src="https://trello-attachments.s3.amazonaws.com/5f747bf33d1087695fb61509/60aec584b0bd8064374540cb/afe9b41d773400c84543c6eb516e50e8/Captura_de_pantalla_2021-05-27_145710.jpg" width="850">
 
 ## What is this game and how I play it?
